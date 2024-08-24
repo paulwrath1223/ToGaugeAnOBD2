@@ -101,15 +101,32 @@ void setup()
 
 void loop()
 {
-    float tempRPM = myELM327.rpm();
 
-    if (myELM327.nb_rx_state == ELM_SUCCESS)
-    {
-        rpm = (uint32_t)tempRPM;
-        Serial.print("RPM: "); Serial.println(rpm);
-    }
-    else if (myELM327.nb_rx_state != ELM_GETTING_MSG)
-        myELM327.printError();
+
+//    >210D011
+//    83F010610D00F1
+//
+//    >2105011
+//    83F01061057E67
+//
+//    >210C011
+//    84F010610C0000F1
+
+    myELM327.sendCommand_Blocking("210D011");
+    myELM327.sendCommand_Blocking("2105011");
+    myELM327.sendCommand_Blocking("210C011");
+
+    delay(1000);
+
+//    float tempRPM = myELM327.rpm();
+//
+//    if (myELM327.nb_rx_state == ELM_SUCCESS)
+//    {
+//        rpm = (uint32_t)tempRPM;
+//        Serial.print("RPM: "); Serial.println(rpm);
+//    }
+//    else if (myELM327.nb_rx_state != ELM_GETTING_MSG)
+//        myELM327.printError();
 //
 //    if (ELM_PORT.available()) {
 //        temp_in = ELM_PORT.read();
