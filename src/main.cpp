@@ -57,35 +57,70 @@ void setup()
         Serial.println("Couldn't connect to OBD scanner - Phase 2");
         while (1);
     }
+//    >ATE0
+//    ATE0
+//    OK
+//
+//    >ATH1
+//    OK
+//
+//    >ATSP5
+//    OK
+//
+//    >ATST64
+//    OK
+//
+//    >ATS0
+//    OK
+//
+//    >ATM0
+//    OK
+//
+//    >ATAT1
+//    OK
+//
+//    >ATSH8210F0
+//    OK
+//
+//    >210001
 
-    Serial.println("Connected to ELM327\nInitiating Slave");
+    myELM327.sendCommand_Blocking("ATE0");
+    myELM327.sendCommand_Blocking("ATH1");
+    myELM327.sendCommand_Blocking("ATSP5");
+    myELM327.sendCommand_Blocking("ATST64");
+    myELM327.sendCommand_Blocking("ATS0");
+    myELM327.sendCommand_Blocking("ATM0");
+    myELM327.sendCommand_Blocking("ATAT1");
+    myELM327.sendCommand_Blocking("ATSH8210F0");
+    myELM327.sendCommand_Blocking("210001");
 
-    PROXY_PORT.begin("OBD2", false);
+    Serial.println("Connected to ELM327");
+
 }
 
 
 void loop()
 {
-//    float tempRPM = myELM327.rpm();
-//
-//    if (myELM327.nb_rx_state == ELM_SUCCESS)
-//    {
-//        rpm = (uint32_t)tempRPM;
-//        Serial.print("RPM: "); Serial.println(rpm);
-//    }
-//    else if (myELM327.nb_rx_state != ELM_GETTING_MSG)
-//        myELM327.printError();
+    float tempRPM = myELM327.rpm();
 
-    if (ELM_PORT.available()) {
-        temp_in = ELM_PORT.read();
-        PROXY_PORT.write(temp_in);
-        DEBUG_PORT.print("Elm -> App: ");
-        DEBUG_PORT.println(temp_in);
+    if (myELM327.nb_rx_state == ELM_SUCCESS)
+    {
+        rpm = (uint32_t)tempRPM;
+        Serial.print("RPM: "); Serial.println(rpm);
     }
-    if (PROXY_PORT.available()) {
-        temp_in = PROXY_PORT.read();
-        ELM_PORT.write(temp_in);
-        DEBUG_PORT.print("App -> Elm: ");
-        DEBUG_PORT.println(temp_in);
-    }
+    else if (myELM327.nb_rx_state != ELM_GETTING_MSG)
+        myELM327.printError();
+//
+//    if (ELM_PORT.available()) {
+//        temp_in = ELM_PORT.read();
+//        PROXY_PORT.write(temp_in);
+//        DEBUG_PORT.print("Elm -> App: ");
+//        DEBUG_PORT.println(temp_in);
+//    }
+//    if (PROXY_PORT.available()) {
+//        temp_in = PROXY_PORT.read();
+//        ELM_PORT.write(temp_in);
+//        DEBUG_PORT.print("App -> Elm: ");
+//        DEBUG_PORT.println(temp_in);
+//    }
 }
