@@ -6,7 +6,7 @@ BluetoothSerial SerialBtElm;
 #define ELM_PORT   SerialBtElm
 #define DEBUG_PORT Serial
 
-
+String send_command(const char * input, uint32_t timeout_ms=1000);
 
 uint32_t rpm = 0;
 
@@ -46,21 +46,20 @@ void setup()
         DEBUG_PORT.println("Couldn't connect to OBD scanner - Phase 1");
         while(1);
     }
-    ELM_PORT.println("ATZ");
-    ELM_PORT.println("ATE0");
-    ELM_PORT.println("ATH1");
-    ELM_PORT.println("ATSP5");
-    ELM_PORT.println("ATST64");
-    ELM_PORT.println("ATS0");
-    ELM_PORT.println("ATM0");
-    ELM_PORT.println("ATAT1");
-    ELM_PORT.println("ATSH8210F0");
-    ELM_PORT.println("210001");
+    send_command("ATZ");
+    send_command("ATE0");
+    send_command("ATH1");
+    send_command("ATSP5");
+    send_command("ATST64");
+    send_command("ATS0");
+    send_command("ATM0");
+    send_command("ATAT1");
+    send_command("ATSH8210F0");
+    send_command("210001");
+
     Serial.println("Connected to ELM327");
 
-    while(ELM_PORT.available()){
-        DEBUG_PORT.println((char)ELM_PORT.read());
-    }
+
 
 }
 
@@ -78,21 +77,9 @@ void loop()
 //    >210C011
 //    84 F0 10 61 0C 00 00 F1
 
-    ELM_PORT.println("210D011");
-    DEBUG_PORT.println("210D011");
-    while(ELM_PORT.available()){
-        DEBUG_PORT.println((char)ELM_PORT.read());
-    }
-    ELM_PORT.println("2105011");
-    DEBUG_PORT.println("2105011");
-    while(ELM_PORT.available()){
-        DEBUG_PORT.println((char)ELM_PORT.read());
-    }
-    ELM_PORT.println("210C011");
-    DEBUG_PORT.println("210C011");
-    while(ELM_PORT.available()){
-        DEBUG_PORT.println((char)ELM_PORT.read());
-    }
+    send_command("210D011");
+    send_command("2105011");
+    send_command("210C011");
 
     delay(1000);
 //
@@ -118,4 +105,23 @@ void loop()
 //        DEBUG_PORT.print("App -> Elm: ");
 //        DEBUG_PORT.println(temp_in);
 //    }
+}
+
+String send_command(const char *input, uint32_t timeout_ms) {
+    String output = "";
+    ELM_PORT.println(*input);
+    DEBUG_PORT.print("Sending: "); DEBUG_PORT.println(*input);
+    unsigned long initial_millis = millis();
+    while(!ELM_PORT.available() || millis() - initial_millis > timeout_ms){
+
+    }
+    if(ELM_PORT.available()){
+        while(ELM_PORT.available()){
+            output.concat((char)ELM_PORT.read());
+        }
+        DEBUG_PORT.print("Received: "); DEBUG_PORT.println(output);
+    } else {
+        DEBUG_PORT.println("Timed out! Returning empty string");
+    }
+    return output;
 }
