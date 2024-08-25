@@ -57,7 +57,9 @@ void setup()
     send_command(ELM_PORT, "ATM0");
     send_command(ELM_PORT, "ATAT1");
     send_command(ELM_PORT, "ATSH8210F0");
-    send_command(ELM_PORT, "210001");
+    send_command(ELM_PORT, "ATDP");
+    send_command(ELM_PORT, "ATFI");
+
 
     Serial.println("Connected to ELM327");
 
@@ -123,6 +125,7 @@ String send_command(Stream &stream, const char* input, uint32_t timeout_ms) {
     #ifdef DO_SEND_COMMAND_DEBUG
     DEBUG_PORT.print("Sending: "); DEBUG_PORT.println(input);
     #endif
+    delay(100);
     unsigned long initial_millis = millis();
     #ifdef DO_SEND_COMMAND_DEBUG
     DEBUG_PORT.print("Waiting for response");
@@ -159,7 +162,7 @@ String send_command(Stream &stream, const char* input, uint32_t timeout_ms) {
             #endif
         }
         #ifdef DO_SEND_COMMAND_DEBUG
-        DEBUG_PORT.print("Received: "); DEBUG_PORT.println(output);
+        DEBUG_PORT.println(output);
         #endif
     } else {
         #ifdef DO_SEND_COMMAND_DEBUG
@@ -168,3 +171,155 @@ String send_command(Stream &stream, const char* input, uint32_t timeout_ms) {
     }
     return output;
 }
+
+//Sending: 210C011
+//Waiting for response....
+//First char arrived: 8
+//Next char arrived: 4
+//Next char arrived: F
+//Next char arrived: 0
+//Next char arrived: 1
+//Next char arrived: 0
+//Next char arrived: 6
+//Next char arrived: 1
+//Next char arrived: 0
+//Next char arrived: C
+//Next char arrived: 0
+//Next char arrived: 0
+//Next char arrived: 0
+//Next char arrived: 0
+//Next char arrived: F
+//Next char arrived: 1
+//Next char arrived:
+//Next char arrived:
+//Next char arrived: >
+//Found delimiter! Good response
+//84F010610C0000F1
+//Sending: 210D011
+//Waiting for response.....
+//First char arrived: 8
+//Next char arrived: 3
+//Next char arrived: F
+//Next char arrived: 0
+//Next char arrived: 1
+//Next char arrived: 0
+//Next char arrived: 6
+//Next char arrived: 1
+//Next char arrived: 0
+//Next char arrived: D
+//Next char arrived: 0
+//Next char arrived: 0
+//Next char arrived: F
+//Next char arrived: 1
+//Next char arrived:
+//Next char arrived:
+//Next char arrived: >
+//Found delimiter! Good response
+//83F010610D00F1
+//Sending: 2105011
+//Waiting for response....
+//First char arrived: 8
+//Next char arrived: 3
+//Next char arrived: F
+//Next char arrived: 0
+//Next char arrived: 1
+//Next char arrived: 0
+//Next char arrived: 6
+//Next char arrived: 1
+//Next char arrived: 0
+//Next char arrived: 5
+//Next char arrived: 8
+//Next char arrived: 3
+//Next char arrived: 6
+//Next char arrived: C
+//Next char arrived:
+//Next char arrived:
+//Next char arrived: >
+//Found delimiter! Good response
+//83F0106105836C
+//Sending: 210C011
+//Waiting for response.....
+//First char arrived: 8
+//Next char arrived: 4
+//Next char arrived: F
+//Next char arrived: 0
+//Next char arrived: 1
+//Next char arrived: 0
+//Next char arrived: 6
+//Next char arrived: 1
+//Next char arrived: 0
+//Next char arrived: C
+//Next char arrived: 0
+//Next char arrived: 0
+//Next char arrived: 0
+//Next char arrived: 0
+//Next char arrived: F
+//Next char arrived: 1
+//Next char arrived:
+//Next char arrived:
+//Next char arrived: >
+//Found delimiter! Good response
+//84F010610C0000F1
+//Sending: 210D011
+//Waiting for response.....
+//First char arrived: 8
+//Next char arrived: 3
+//Next char arrived: F
+//Next char arrived: 0
+//Next char arrived: 1
+//Next char arrived: 0
+//Next char arrived: 6
+//Next char arrived: 1
+//Next char arrived: 0
+//Next char arrived: D
+//Next char arrived: 0
+//Next char arrived: 0
+//Next char arrived: F
+//Next char arrived: 1
+//Next char arrived:
+//Next char arrived:
+//Next char arrived: >
+//Found delimiter! Good response
+//83F010610D00F1
+//Sending: 2105011
+//Waiting for response.....
+//First char arrived: 8
+//Next char arrived: 3
+//Next char arrived: F
+//Next char arrived: 0
+//Next char arrived: 1
+//Next char arrived: 0
+//Next char arrived: 6
+//Next char arrived: 1
+//Next char arrived: 0
+//Next char arrived: 5
+//Next char arrived: 8
+//Next char arrived: 3
+//Next char arrived: 6
+//Next char arrived: C
+//Next char arrived:
+//Next char arrived:
+//Next char arrived: >
+//Found delimiter! Good response
+//83F0106105836C
+//Sending: 210C011
+//Waiting for response....
+//First char arrived: 8
+//Next char arrived: 4
+//Next char arrived: F
+//Next char arrived: 0
+//Next char arrived: 1
+//Next char arrived: 0
+//Next char arrived: 6
+//Next char arrived: 1
+//Next char arrived: 0
+//Next char arrived: C
+//Next char arrived: 0
+//Next char arrived: 0
+//Next char arrived: 0
+//Next char arrived: 0
+//Next char arrived: F
+//Next char arrived: 1
+//Next char arrived:
+//Next char arrived:
+//Next char arrived: >
