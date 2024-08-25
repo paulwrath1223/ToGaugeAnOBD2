@@ -6,7 +6,10 @@ BluetoothSerial SerialBtElm;
 #define ELM_PORT   SerialBtElm
 #define DEBUG_PORT Serial
 
-String send_command(const char * input, uint32_t timeout_ms=1000);
+#define DO_SEND_COMMAND_DEBUG
+
+String send_command(Stream &stream, const char* input, uint32_t timeout_ms=2000);
+void clear_stream(Stream &stream);
 
 uint32_t rpm = 0;
 
@@ -20,7 +23,6 @@ void setup()
 #endif
 
     DEBUG_PORT.begin(115200);
-    //SerialBT.setPin("1234");
     ELM_PORT.begin("ArduHUD", true);
 
 //    BTScanResults* results = ELM_PORT.discover(60000);
@@ -46,16 +48,16 @@ void setup()
         DEBUG_PORT.println("Couldn't connect to OBD scanner - Phase 1");
         while(1);
     }
-    send_command("ATZ");
-    send_command("ATE0");
-    send_command("ATH1");
-    send_command("ATSP5");
-    send_command("ATST64");
-    send_command("ATS0");
-    send_command("ATM0");
-    send_command("ATAT1");
-    send_command("ATSH8210F0");
-    send_command("210001");
+    send_command(ELM_PORT, "ATZ");
+    send_command(ELM_PORT, "ATE0");
+    send_command(ELM_PORT, "ATH1");
+    send_command(ELM_PORT, "ATSP5");
+    send_command(ELM_PORT, "ATST64");
+    send_command(ELM_PORT, "ATS0");
+    send_command(ELM_PORT, "ATM0");
+    send_command(ELM_PORT, "ATAT1");
+    send_command(ELM_PORT, "ATSH8210F0");
+    send_command(ELM_PORT, "210001");
 
     Serial.println("Connected to ELM327");
 
@@ -77,10 +79,9 @@ void loop()
 //    >210C011
 //    84 F0 10 61 0C 00 00 F1
 
-    send_command("210D011");
-    send_command("2105011");
-    send_command("210C011");
-
+    send_command(ELM_PORT, "210D011");
+    send_command(ELM_PORT, "2105011");
+    send_command(ELM_PORT, "210C011");
     delay(1000);
 //
 //    float tempRPM = myELM327.rpm();
@@ -107,21 +108,63 @@ void loop()
 //    }
 }
 
-String send_command(const char *input, uint32_t timeout_ms) {
-    String output = "";
-    ELM_PORT.println(*input);
-    DEBUG_PORT.print("Sending: "); DEBUG_PORT.println(*input);
-    unsigned long initial_millis = millis();
-    while(!ELM_PORT.available() || millis() - initial_millis > timeout_ms){
-
+void clear_stream(Stream &stream){
+    while(stream.available()){
+        stream.read();
     }
-    if(ELM_PORT.available()){
-        while(ELM_PORT.available()){
-            output.concat((char)ELM_PORT.read());
+}
+
+String send_command(Stream &stream, const char* input, uint32_t timeout_ms) {
+    String output = "";
+    char current_char = '\0';
+    clear_stream(stream);
+    stream.print(input);
+    stream.print("\r\n");
+    #ifdef DO_SEND_COMMAND_DEBUG
+    DEBUG_PORT.print("Sending: "); DEBUG_PORT.println(input);
+    #endif
+    unsigned long initial_millis = millis();
+    #ifdef DO_SEND_COMMAND_DEBUG
+    DEBUG_PORT.print("Waiting for response");
+    #endif
+    while(!stream.available() && millis() - initial_millis < timeout_ms){
+        #ifdef DO_SEND_COMMAND_DEBUG
+        DEBUG_PORT.print(".");
+        delay(20);
+        #endif
+    }
+    if(stream.available()){
+        current_char = (char)stream.read();
+        initial_millis = millis();
+        #ifdef DO_SEND_COMMAND_DEBUG
+        DEBUG_PORT.print("\nFirst char arrived: "); DEBUG_PORT.println(current_char);
+        #endif
+        while(current_char != '>' && millis() - initial_millis < timeout_ms){
+            while(!stream.available() && millis() - initial_millis < timeout_ms){}
+            if(stream.available()){
+                output.concat(current_char);
+                current_char = (char)stream.read();
+                #ifdef DO_SEND_COMMAND_DEBUG
+                DEBUG_PORT.print("Next char arrived: "); DEBUG_PORT.println(current_char);
+                #endif
+            }
         }
+        if(current_char == '>'){
+            #ifdef DO_SEND_COMMAND_DEBUG
+            DEBUG_PORT.println("Found delimiter! Good response");
+            #endif
+        } else {
+            #ifdef DO_SEND_COMMAND_DEBUG
+            DEBUG_PORT.println("No Delimiter, Timed out after received at least one byte.");
+            #endif
+        }
+        #ifdef DO_SEND_COMMAND_DEBUG
         DEBUG_PORT.print("Received: "); DEBUG_PORT.println(output);
+        #endif
     } else {
+        #ifdef DO_SEND_COMMAND_DEBUG
         DEBUG_PORT.println("Timed out! Returning empty string");
+        #endif
     }
     return output;
 }
