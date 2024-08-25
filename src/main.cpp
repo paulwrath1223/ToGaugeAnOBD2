@@ -6,7 +6,8 @@ BluetoothSerial SerialBtElm;
 #define ELM_PORT   SerialBtElm
 #define DEBUG_PORT Serial
 
-String send_command(const char * input, uint32_t timeout_ms=1000);
+String send_command(const char* input, uint32_t timeout_ms=1000);
+void flushInputBuff();
 
 uint32_t rpm = 0;
 
@@ -47,15 +48,25 @@ void setup()
         while(1);
     }
     send_command("ATZ");
+    delay(100);
     send_command("ATE0");
+    delay(100);
     send_command("ATH1");
+    delay(100);
     send_command("ATSP5");
+    delay(100);
     send_command("ATST64");
+    delay(100);
     send_command("ATS0");
+    delay(100);
     send_command("ATM0");
+    delay(100);
     send_command("ATAT1");
+    delay(100);
     send_command("ATSH8210F0");
+    delay(100);
     send_command("210001");
+    delay(100);
 
     Serial.println("Connected to ELM327");
 
@@ -78,7 +89,9 @@ void loop()
 //    84 F0 10 61 0C 00 00 F1
 
     send_command("210D011");
+    delay(100);
     send_command("2105011");
+    delay(100);
     send_command("210C011");
 
     delay(1000);
@@ -107,10 +120,21 @@ void loop()
 //    }
 }
 
-String send_command(const char *input, uint32_t timeout_ms) {
+void flushInputBuff(){
+    while (ELM_PORT.available())
+    {
+        ELM_PORT.read();
+    }
+}
+
+String send_command(const char* input, uint32_t timeout_ms) {
     String output = "";
-    ELM_PORT.println(*input);
-    DEBUG_PORT.print("Sending: "); DEBUG_PORT.println(*input);
+
+    flushInputBuff();
+
+    ELM_PORT.print(input);
+    ELM_PORT.print('\r');
+    DEBUG_PORT.print("Sending: "); DEBUG_PORT.println(input);
     unsigned long initial_millis = millis();
     while(!ELM_PORT.available() || millis() - initial_millis > timeout_ms){
 
