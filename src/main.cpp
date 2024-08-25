@@ -83,7 +83,7 @@ void setup()
 //    OK
 //
 //    >210001
-
+    myELM327.sendCommand_Blocking("ATZ");
     myELM327.sendCommand_Blocking("ATE0");
     myELM327.sendCommand_Blocking("ATH1");
     myELM327.sendCommand_Blocking("ATSP5");
@@ -93,6 +93,7 @@ void setup()
     myELM327.sendCommand_Blocking("ATAT1");
     myELM327.sendCommand_Blocking("ATSH8210F0");
     myELM327.sendCommand_Blocking("210001");
+    
 
     Serial.println("Connected to ELM327");
 
@@ -104,29 +105,29 @@ void loop()
 
 
 //    >210D011
-//    83F010610D00F1
+//    83 F0 10 61 0D 00 F1
 //
 //    >2105011
-//    83F01061057E67
+//    83 F0 10 61 05 7E 67
 //
 //    >210C011
-//    84F010610C0000F1
+//    84 F0 10 61 0C 00 00 F1
 
-    myELM327.sendCommand_Blocking("210D011");
-    myELM327.sendCommand_Blocking("2105011");
-    myELM327.sendCommand_Blocking("210C011");
+//    myELM327.sendCommand_Blocking("210D011");
+//    myELM327.sendCommand_Blocking("2105011");
+//    myELM327.sendCommand_Blocking("210C011");
 
     delay(1000);
 
-//    float tempRPM = myELM327.rpm();
-//
-//    if (myELM327.nb_rx_state == ELM_SUCCESS)
-//    {
-//        rpm = (uint32_t)tempRPM;
-//        Serial.print("RPM: "); Serial.println(rpm);
-//    }
-//    else if (myELM327.nb_rx_state != ELM_GETTING_MSG)
-//        myELM327.printError();
+    float tempRPM = myELM327.rpm();
+
+    if (myELM327.nb_rx_state == ELM_SUCCESS)
+    {
+        rpm = (uint32_t)tempRPM;
+        Serial.print("RPM: "); Serial.println(rpm);
+    }
+    else if (myELM327.nb_rx_state != ELM_GETTING_MSG)
+        myELM327.printError();
 //
 //    if (ELM_PORT.available()) {
 //        temp_in = ELM_PORT.read();
