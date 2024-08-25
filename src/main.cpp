@@ -1,16 +1,11 @@
 #include "BluetoothSerial.h"
-#include "ELMduino.h"
 #include "Arduino.h"
 
+BluetoothSerial SerialBtElm;
 
-BluetoothSerial SerialBTElm;
-BluetoothSerial SerialBTSlave;
-#define ELM_PORT   SerialBTElm
+#define ELM_PORT   SerialBtElm
 #define DEBUG_PORT Serial
-#define PROXY_PORT SerialBTSlave
 
-
-ELM327 myELM327;
 
 
 uint32_t rpm = 0;
@@ -51,51 +46,21 @@ void setup()
         DEBUG_PORT.println("Couldn't connect to OBD scanner - Phase 1");
         while(1);
     }
-
-    if (!myELM327.begin(ELM_PORT, true, 2000))
-    {
-        Serial.println("Couldn't connect to OBD scanner - Phase 2");
-        while (1);
-    }
-//    >ATE0
-//    ATE0
-//    OK
-//
-//    >ATH1
-//    OK
-//
-//    >ATSP5
-//    OK
-//
-//    >ATST64
-//    OK
-//
-//    >ATS0
-//    OK
-//
-//    >ATM0
-//    OK
-//
-//    >ATAT1
-//    OK
-//
-//    >ATSH8210F0
-//    OK
-//
-//    >210001
-    myELM327.sendCommand_Blocking("ATZ");
-    myELM327.sendCommand_Blocking("ATE0");
-    myELM327.sendCommand_Blocking("ATH1");
-    myELM327.sendCommand_Blocking("ATSP5");
-    myELM327.sendCommand_Blocking("ATST64");
-    myELM327.sendCommand_Blocking("ATS0");
-    myELM327.sendCommand_Blocking("ATM0");
-    myELM327.sendCommand_Blocking("ATAT1");
-    myELM327.sendCommand_Blocking("ATSH8210F0");
-    myELM327.sendCommand_Blocking("210001");
-    
-
+    ELM_PORT.println("ATZ");
+    ELM_PORT.println("ATE0");
+    ELM_PORT.println("ATH1");
+    ELM_PORT.println("ATSP5");
+    ELM_PORT.println("ATST64");
+    ELM_PORT.println("ATS0");
+    ELM_PORT.println("ATM0");
+    ELM_PORT.println("ATAT1");
+    ELM_PORT.println("ATSH8210F0");
+    ELM_PORT.println("210001");
     Serial.println("Connected to ELM327");
+
+    while(ELM_PORT.available()){
+        DEBUG_PORT.println((char)ELM_PORT.read());
+    }
 
 }
 
@@ -113,21 +78,33 @@ void loop()
 //    >210C011
 //    84 F0 10 61 0C 00 00 F1
 
-//    myELM327.sendCommand_Blocking("210D011");
-//    myELM327.sendCommand_Blocking("2105011");
-//    myELM327.sendCommand_Blocking("210C011");
+    ELM_PORT.println("210D011");
+    DEBUG_PORT.println("210D011");
+    while(ELM_PORT.available()){
+        DEBUG_PORT.println((char)ELM_PORT.read());
+    }
+    ELM_PORT.println("2105011");
+    DEBUG_PORT.println("2105011");
+    while(ELM_PORT.available()){
+        DEBUG_PORT.println((char)ELM_PORT.read());
+    }
+    ELM_PORT.println("210C011");
+    DEBUG_PORT.println("210C011");
+    while(ELM_PORT.available()){
+        DEBUG_PORT.println((char)ELM_PORT.read());
+    }
 
     delay(1000);
-
-    float tempRPM = myELM327.rpm();
-
-    if (myELM327.nb_rx_state == ELM_SUCCESS)
-    {
-        rpm = (uint32_t)tempRPM;
-        Serial.print("RPM: "); Serial.println(rpm);
-    }
-    else if (myELM327.nb_rx_state != ELM_GETTING_MSG)
-        myELM327.printError();
+//
+//    float tempRPM = myELM327.rpm();
+//
+//    if (myELM327.nb_rx_state == ELM_SUCCESS)
+//    {
+//        rpm = (uint32_t)tempRPM;
+//        Serial.print("RPM: "); Serial.println(rpm);
+//    }
+//    else if (myELM327.nb_rx_state != ELM_GETTING_MSG)
+//        myELM327.printError();
 //
 //    if (ELM_PORT.available()) {
 //        temp_in = ELM_PORT.read();
