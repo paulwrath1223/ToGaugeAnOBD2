@@ -13,10 +13,7 @@ String send_command(Stream &stream, const char* input, uint32_t timeout_ms=2000)
 void clear_stream(Stream &stream);
 String byte_to_hex_string(byte input_byte);
 long hex_string_to_int(const char* hex_str_input);
-byte calculateChecksum(const byte data[], int length);
 int hex_string_to_byte_array(const char *hex_str_input);
-void getPID(Stream &stream, byte pid);
-String generateRequest(const byte data[], int length, byte pid);
 
 
 uint32_t rpm = 0;
@@ -75,7 +72,6 @@ void loop()
     send_command(ELM_PORT, "2105011");
     send_command(ELM_PORT, "210C011");
 
-    getPID(ELM_PORT, VEHICLE_SPEED);
 
     delay(1000);
 
@@ -144,19 +140,17 @@ String send_command(Stream &stream, const char* input, uint32_t timeout_ms) {
 }
 
 String byte_to_hex_string(byte input_byte) {
-    return String(input_byte, HEX);
+    String out = String(input_byte, HEX);
+    if(out.length() == 1){
+        String padded_out = "0";
+        padded_out.concat(out);
+        return padded_out;
+    }
+    return out;
 }
 
 long hex_string_to_int(const char *hex_str_input) {
     return strtol(hex_str_input, nullptr, 16);
-}
-
-byte calculateChecksum(const byte *data, int length) {
-    byte checksum = 0;
-    for (int i = 0; i < length; i++) {
-        checksum += data[i];
-    }
-    return checksum % 256;
 }
 
 int hex_string_to_byte_array(const char *hex_str_input) {
@@ -173,49 +167,21 @@ int hex_string_to_byte_array(const char *hex_str_input) {
     return i;
 }
 
-void getPID(Stream &stream, byte pid) {
-    // example Request: C2 33 F1 01 0C F3
-    // example Response: 84 F1 11 41 0C 1F 40 32
-    DEBUG_PORT.print("getPID called with PID ");
-    DEBUG_PORT.println(byte_to_hex_string(pid));
+float getEngineSpeedRpm(Stream &stream){
+    String result = send_command(stream, "210C011");
+    // 84 F0 10 61 0C 00 00 F1
+    int length = hex_string_to_byte_array(result.c_str());
 
-    const char* request = generateRequest(live_data, sizeof(live_data), pid).c_str();
+    int actual_checksum = 0;
 
-    DEBUG_PORT.print("Generated request: ");
-    DEBUG_PORT.println(request);
-
-    String response = send_command(stream, request);
-
-    DEBUG_PORT.print("Got response: ");
-    DEBUG_PORT.println(response);
-
-    int length = hex_string_to_byte_array(response.c_str());
-
-    DEBUG_PORT.print("response as bytes:");
-    for(int index = 0; index < length; index++){
-        DEBUG_PORT.println(byte_to_hex_string(byte_array[index]));
+    for(int i = 0; i<length-1; i++){
+        actual_checksum += byte_array[i];
     }
-}
-
-String generateRequest(const byte *data, int length, const byte pid) {
-    DEBUG_PORT.println("Generating request.");
-    String request = "";
-    String temp = "";
-
-    byte extendedData[length + 2];
-    memcpy(extendedData, data, length);
-    extendedData[length] = pid;
-    byte checksum = calculateChecksum(extendedData, length + 1);
-    extendedData[length + 1] = checksum;
-
-    for (int i = 0; i < length + 2; i++) {
-        temp = byte_to_hex_string(extendedData[i]);
-        request.concat(temp);
-        DEBUG_PORT.println(temp);
+    if(byte_array[length-1] == (actual_checksum % 255) && byte_array[4] == 0x0C){
+        return((((float)byte_array[5] * (float)255.0) + (float)byte_array[6])/(float)4.0);
+        // (255*BA[5] + BA[6])/4
     }
-    DEBUG_PORT.println("Final request: ");
-    DEBUG_PORT.println(request);
-    return request;
+    return -0.0;
 }
 
 
