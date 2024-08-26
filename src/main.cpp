@@ -1,5 +1,6 @@
 #include "BluetoothSerial.h"
 #include "Arduino.h"
+#include "PIDs.h"
 
 BluetoothSerial SerialBtElm;
 
@@ -10,8 +11,15 @@ BluetoothSerial SerialBtElm;
 
 String send_command(Stream &stream, const char* input, uint32_t timeout_ms=2000);
 void clear_stream(Stream &stream);
+String byte_to_hex_string(byte input_byte);
+long hex_string_to_int(const char* hex_str_input);
+byte calculateChecksum(const byte data[], int length);
+int hex_string_to_byte_array(const char *hex_str_input);
+void getPID(Stream &stream, byte pid);
+
 
 uint32_t rpm = 0;
+byte byte_array[100] = {0};
 
 int temp_in;
 
@@ -25,23 +33,6 @@ void setup()
     DEBUG_PORT.begin(115200);
     ELM_PORT.begin("ArduHUD", true);
 
-//    BTScanResults* results = ELM_PORT.discover(60000);
-//    const int num_results = results->getCount();
-//    BTAdvertisedDevice* temp_device;
-//    String device_name;
-//    String device_mac;
-//
-//    for(int i = 0; i < num_results; i++){
-//        temp_device = results->getDevice(i);
-//        device_name = temp_device->getName().c_str();
-//        device_mac = temp_device->getAddress().toString().c_str();
-//
-//        DEBUG_PORT.print("found device {");
-//        DEBUG_PORT.print(device_name);
-//        DEBUG_PORT.print("} with address {");
-//        DEBUG_PORT.print(device_mac);
-//        DEBUG_PORT.println("}.");
-//    }
 
     if (!ELM_PORT.connect("VEEPEAK"))
     {
@@ -82,30 +73,11 @@ void loop()
     send_command(ELM_PORT, "210D011");
     send_command(ELM_PORT, "2105011");
     send_command(ELM_PORT, "210C011");
+
+    getPID(ELM_PORT, VEHICLE_SPEED);
+
     delay(1000);
-//
-//    float tempRPM = myELM327.rpm();
-//
-//    if (myELM327.nb_rx_state == ELM_SUCCESS)
-//    {
-//        rpm = (uint32_t)tempRPM;
-//        Serial.print("RPM: "); Serial.println(rpm);
-//    }
-//    else if (myELM327.nb_rx_state != ELM_GETTING_MSG)
-//        myELM327.printError();
-//
-//    if (ELM_PORT.available()) {
-//        temp_in = ELM_PORT.read();
-//        PROXY_PORT.write(temp_in);
-//        DEBUG_PORT.print("Elm -> App: ");
-//        DEBUG_PORT.println(temp_in);
-//    }
-//    if (PROXY_PORT.available()) {
-//        temp_in = PROXY_PORT.read();
-//        ELM_PORT.write(temp_in);
-//        DEBUG_PORT.print("App -> Elm: ");
-//        DEBUG_PORT.println(temp_in);
-//    }
+
 }
 
 void clear_stream(Stream &stream){
@@ -168,3 +140,78 @@ String send_command(Stream &stream, const char* input, uint32_t timeout_ms) {
     }
     return output;
 }
+
+String byte_to_hex_string(byte input_byte) {
+    return String(input_byte, HEX);
+}
+
+long hex_string_to_int(const char *hex_str_input) {
+    return strtol(hex_str_input, nullptr, 16);
+}
+
+byte calculateChecksum(const byte *data, int length) {
+    byte checksum = 0;
+    for (int i = 0; i < length; i++) {
+        checksum += data[i];
+    }
+    return checksum % 256;
+}
+
+int hex_string_to_byte_array(const char *hex_str_input) {
+    int i = 0;
+    char char_pair[2];
+    char_pair[0] = hex_str_input[2*i];
+    char_pair[1] = hex_str_input[2*i+1];
+    while(char_pair[0] != '\0' && char_pair[1] != '\0'){
+        byte_array[i] = hex_string_to_int(char_pair);
+        i++;
+        char_pair[0] = hex_str_input[2*i];
+        char_pair[1] = hex_str_input[2*i+1];
+    }
+    return i;
+}
+
+void getPID(Stream &stream, byte pid) {
+    // example Request: C2 33 F1 01 0C F3
+    // example Response: 84 F1 11 41 0C 1F 40 32
+    DEBUG_PORT.print("getPID called with PID ");
+    DEBUG_PORT.println(byte_to_hex_string(pid));
+
+    const char* request = generateRequest(stream, live_data, sizeof(live_data), pid).c_str();
+
+    DEBUG_PORT.print("Generated request: ");
+    DEBUG_PORT.println(request);
+
+    String response = send_command(stream, request);
+
+    DEBUG_PORT.print("Got response: ");
+    DEBUG_PORT.println(response);
+
+    int length = hex_string_to_byte_array(response.c_str());
+
+    DEBUG_PORT.print("response as bytes:");
+    for(int index = 0; index < length; index++){
+        DEBUG_PORT.println(byte_to_hex_string(byte_array[index]));
+    }
+}
+
+String generateRequest(Stream &stream, const byte data[], int length, const byte pid) {
+
+    String request = "";
+
+    byte extendedData[length + 2];
+    memcpy(extendedData, data, length);
+    extendedData[length] = pid;
+    byte checksum = calculateChecksum(extendedData, length + 1);
+    extendedData[length + 1] = checksum;
+
+    for (int i = 0; i < length + 2; i++) {
+        request.concat(byte_to_hex_string(extendedData[i]));
+    }
+    return request;
+}
+
+
+
+
+
