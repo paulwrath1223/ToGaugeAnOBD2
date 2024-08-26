@@ -16,6 +16,7 @@ long hex_string_to_int(const char* hex_str_input);
 byte calculateChecksum(const byte data[], int length);
 int hex_string_to_byte_array(const char *hex_str_input);
 void getPID(Stream &stream, byte pid);
+String generateRequest(const byte data[], int length, byte pid);
 
 
 uint32_t rpm = 0;
@@ -178,7 +179,7 @@ void getPID(Stream &stream, byte pid) {
     DEBUG_PORT.print("getPID called with PID ");
     DEBUG_PORT.println(byte_to_hex_string(pid));
 
-    const char* request = generateRequest(stream, live_data, sizeof(live_data), pid).c_str();
+    const char* request = generateRequest(live_data, sizeof(live_data), pid).c_str();
 
     DEBUG_PORT.print("Generated request: ");
     DEBUG_PORT.println(request);
@@ -196,7 +197,7 @@ void getPID(Stream &stream, byte pid) {
     }
 }
 
-String generateRequest(Stream &stream, const byte data[], int length, const byte pid) {
+String generateRequest(const byte *data, int length, const byte pid) {
 
     String request = "";
 
@@ -213,6 +214,42 @@ String generateRequest(Stream &stream, const byte data[], int length, const byte
 }
 
 
+
+//getPID called with PID d
+//Generated request:
+//Sending:
+//Waiting for response...
+//First char arrived: 8
+//Next char arrived: 4
+//Next char arrived: F
+//Next char arrived: 0
+//Next char arrived: 1
+//Next char arrived: 0
+//Next char arrived: 6
+//Next char arrived: 1
+//Next char arrived: 0
+//Next char arrived: C
+//Next char arrived: 0
+//Next char arrived: 0
+//Next char arrived: 0
+//Next char arrived: 0
+//Next char arrived: F
+//Next char arrived: 1
+//Next char arrived:
+//Next char arrived:
+//Next char arrived: >
+//Found delimiter! Good response
+//84F010610C0000F1
+//Got response: 84F010610C0000F1
+//response as bytes:84
+//f0
+//10
+//61
+//c
+//0
+//0
+//f1
+//0
 
 
 
