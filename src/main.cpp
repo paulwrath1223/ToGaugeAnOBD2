@@ -14,6 +14,7 @@ void clear_stream(Stream &stream);
 String byte_to_hex_string(byte input_byte);
 long hex_string_to_int(const char* hex_str_input);
 int hex_string_to_byte_array(const char *hex_str_input);
+float getEngineSpeedRpm(Stream &stream);
 
 
 uint32_t rpm = 0;
@@ -68,10 +69,9 @@ void loop()
 //    >210C011
 //    84 F0 10 61 0C 00 00 F1
 
-    send_command(ELM_PORT, "210D011");
-    send_command(ELM_PORT, "2105011");
-    send_command(ELM_PORT, "210C011");
-
+    rpm = (uint32_t)getEngineSpeedRpm(ELM_PORT);
+    DEBUG_PORT.println("speed: ");
+    DEBUG_PORT.println(rpm);
 
     delay(1000);
 
@@ -167,7 +167,7 @@ int hex_string_to_byte_array(const char *hex_str_input) {
     return i;
 }
 
-float getEngineSpeedRpm(Stream &stream){
+float getEngineSpeedRpm(Stream &stream) {
     String result = send_command(stream, "210C011");
     // 84 F0 10 61 0C 00 00 F1
     int length = hex_string_to_byte_array(result.c_str());
@@ -181,6 +181,7 @@ float getEngineSpeedRpm(Stream &stream){
         return((((float)byte_array[5] * (float)255.0) + (float)byte_array[6])/(float)4.0);
         // (255*BA[5] + BA[6])/4
     }
+    DEBUG_PORT.println("RPM data either failed checksum or did not match request");
     return -0.0;
 }
 
