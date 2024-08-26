@@ -198,8 +198,9 @@ void getPID(Stream &stream, byte pid) {
 }
 
 String generateRequest(const byte *data, int length, const byte pid) {
-
+    DEBUG_PORT.println("Generating request.");
     String request = "";
+    String temp = "";
 
     byte extendedData[length + 2];
     memcpy(extendedData, data, length);
@@ -208,8 +209,12 @@ String generateRequest(const byte *data, int length, const byte pid) {
     extendedData[length + 1] = checksum;
 
     for (int i = 0; i < length + 2; i++) {
-        request.concat(byte_to_hex_string(extendedData[i]));
+        temp = byte_to_hex_string(extendedData[i]);
+        request.concat(temp);
+        DEBUG_PORT.println(temp);
     }
+    DEBUG_PORT.println("Final request: ");
+    DEBUG_PORT.println(request);
     return request;
 }
 
