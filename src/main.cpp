@@ -95,6 +95,7 @@ String send_command(Stream &stream, const char* input, uint32_t timeout_ms) {
     #ifdef DO_SEND_COMMAND_DEBUG
     DEBUG_PORT.print("Sending: "); DEBUG_PORT.println(input);
     #endif
+    delay(100);
     unsigned long initial_millis = millis();
     #ifdef DO_SEND_COMMAND_DEBUG
     DEBUG_PORT.print("Waiting for response");
@@ -131,7 +132,7 @@ String send_command(Stream &stream, const char* input, uint32_t timeout_ms) {
             #endif
         }
         #ifdef DO_SEND_COMMAND_DEBUG
-        DEBUG_PORT.print("Received: "); DEBUG_PORT.println(output);
+        DEBUG_PORT.println(output);
         #endif
     } else {
         #ifdef DO_SEND_COMMAND_DEBUG
