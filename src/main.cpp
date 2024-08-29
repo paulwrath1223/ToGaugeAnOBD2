@@ -7,6 +7,10 @@ BluetoothSerial SerialBtElm;
 #define ELM_PORT   SerialBtElm
 #define DEBUG_PORT Serial
 
+#define SANITY_MAX_RPM 9000 // the highest RPM value to accept. higher values will be clamped and issue warnings.
+#define SANITY_MIN_COOLANT_TEMP_CELCIUS -100 // the highest RPM value to accept. higher values will be clamped and issue warnings.
+#define SANITY_MAX_COOLANT_TEMP_CELCIUS 250 // the highest RPM value to accept. higher values will be clamped and issue warnings.
+
 #define DO_SEND_COMMAND_DEBUG
 
 String send_command(Stream &stream, const char* input, uint32_t timeout_ms=2000);
@@ -15,6 +19,7 @@ String byte_to_hex_string(byte input_byte);
 long hex_string_to_int(const char* hex_str_input);
 int hex_string_to_byte_array(const char *hex_str_input);
 float getEngineSpeedRpm(Stream &stream);
+int16_t getEngineCoolantTempC(Stream &stream);
 
 
 uint32_t rpm = 0;
@@ -72,6 +77,14 @@ void loop()
     rpm = (uint32_t)getEngineSpeedRpm(ELM_PORT);
     DEBUG_PORT.println("speed: ");
     DEBUG_PORT.println(rpm);
+
+    String voltage = send_command(ELM_PORT, "ATRV");
+    DEBUG_PORT.println("voltage: ");
+    DEBUG_PORT.println(voltage);
+
+    int16_t coolant_temp_c = getEngineCoolantTempC(ELM_PORT);
+    DEBUG_PORT.println("coolant_temp_c: ");
+    DEBUG_PORT.println(coolant_temp_c);
 
     delay(1000);
 
@@ -169,6 +182,7 @@ int hex_string_to_byte_array(const char *hex_str_input) {
 
 float getEngineSpeedRpm(Stream &stream) {
     String result = send_command(stream, "210C011");
+
     // 84 F0 10 61 0C 00 00 F1
     int length = hex_string_to_byte_array(result.c_str());
 
@@ -177,12 +191,64 @@ float getEngineSpeedRpm(Stream &stream) {
     for(int i = 0; i<length-1; i++){
         actual_checksum += byte_array[i];
     }
-    if(byte_array[length-1] == (actual_checksum % 255) && byte_array[4] == 0x0C){
-        return((((float)byte_array[5] * (float)255.0) + (float)byte_array[6])/(float)4.0);
+    if(byte_array[length-1] == (actual_checksum % 256) && byte_array[4] == 0x0C){
+        float result_rpm = ((((float)byte_array[5] * (float)255.0) + (float)byte_array[6])/(float)4.0);
         // (255*BA[5] + BA[6])/4
+
+        if(result_rpm>SANITY_MAX_RPM){
+            DEBUG_PORT.println("RPM data returned value over SANITY_MAX_RPM. clamping and returning SANITY_MAX_RPM");
+            return 9000.0;
+        }
+        if(result_rpm<0){
+            DEBUG_PORT.println("RPM data returned a negative number!! "
+                               "This physically isn't possible and must be a problem with my code, "
+                               "but clamping and returning 0 nonetheless");
+            return 0.0;
+        }
+
+        return result_rpm;
     }
+
+
+
     DEBUG_PORT.println("RPM data either failed checksum or did not match request");
     return -0.0;
+}
+
+int16_t getEngineCoolantTempC(Stream &stream) {
+    String result = send_command(stream, "2105011");
+
+    // 83 F0 10 61 05 7E 67
+    int length = hex_string_to_byte_array(result.c_str());
+
+    int actual_checksum = 0;
+
+    for(int i = 0; i<length-1; i++){
+        actual_checksum += byte_array[i];
+    }
+    if(byte_array[length-1] == (actual_checksum % 256) && byte_array[4] == 0x05){
+        int16_t result_celcius = (int16_t)byte_array[5] - 40;
+        // (255*BA[5] + BA[6])/4
+
+        if(result_celcius > SANITY_MAX_COOLANT_TEMP_CELCIUS){
+            DEBUG_PORT.println("Engine coolant temp data returned value over SANITY_MAX_COOLANT_TEMP_CELCIUS."
+                               "clamping and returning SANITY_MAX_COOLANT_TEMP_CELCIUS");
+            return SANITY_MAX_COOLANT_TEMP_CELCIUS;
+        }
+        if(result_celcius < SANITY_MIN_COOLANT_TEMP_CELCIUS){
+            DEBUG_PORT.println("Engine coolant temp data returned value under SANITY_MIN_COOLANT_TEMP_CELCIUS."
+                               "clamping and returning SANITY_MIN_COOLANT_TEMP_CELCIUS");
+            return SANITY_MIN_COOLANT_TEMP_CELCIUS;
+        }
+
+        return result_celcius;
+    }
+
+
+
+    DEBUG_PORT.println("RPM data either failed checksum or did not match request."
+                       "Returning SANITY_MIN_COOLANT_TEMP_CELCIUS");
+    return SANITY_MIN_COOLANT_TEMP_CELCIUS;
 }
 
 
