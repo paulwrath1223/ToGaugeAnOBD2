@@ -152,8 +152,9 @@ int16_t KWP2000ELM::getEngineCoolantTempC() {
         actual_checksum += byte_array[i];
     }
     if(byte_array[length-1] == (actual_checksum % 256) && byte_array[4] == 0x05){
-        int16_t result_celsius = (int16_t)byte_array[5] - 40;
-        // (255*BA[5] + BA[6])/4
+        int16_t result_celsius = (int16_t)(byte_array[5]) - 40; // linter seems to get booty tickled by this line.
+        // Thinks the custom type `byte` defined in arduino is actually an int, not a uint8_t.
+
 
         if(result_celsius > SANITY_MAX_COOLANT_TEMP_CELSIUS){
             DEBUG_PORT.println("Engine coolant temp data returned value over SANITY_MAX_COOLANT_TEMP_CELSIUS."

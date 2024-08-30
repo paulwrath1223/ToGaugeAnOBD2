@@ -12,9 +12,9 @@ BluetoothSerial SerialBtElm;
 
 
 uint32_t rpm = 0;
-byte byte_array[100] = {0};
 
-int temp_in;
+
+
 
 KWP2000ELM elm = KWP2000ELM(ELM_PORT);
 
