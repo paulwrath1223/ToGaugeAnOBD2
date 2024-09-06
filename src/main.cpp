@@ -59,9 +59,13 @@ void loop()
     DEBUG_PORT.println("speed: ");
     DEBUG_PORT.println(rpm);
 
+    delay(100);
+
     String voltage = elm.send_command("ATRV");
     DEBUG_PORT.println("voltage: ");
     DEBUG_PORT.println(voltage);
+
+    delay(100);
 
     int16_t coolant_temp_c = elm.getEngineCoolantTempC();
     DEBUG_PORT.println("coolant_temp_c: ");
@@ -203,106 +207,253 @@ void loop()
 //Next char arrived: >
 //Found delimiter! Good response
 //86F0106100083E9001BE
-//ECU Connection Failed
-//Communication with the ECU was unable to be verified or did not work. Try restarting
-//Sending: 210C011
-//Waiting for response
-//First char arrived: ?
-//Next char arrived:
-//Next char arrived:
-//Next char arrived: >
-//Found delimiter! Good response
-//?
-//RPM data either failed checksum or did not match request
-//speed:
-//0
-//Sending: ATRV
-//Waiting for response
-//First char arrived: 1
-//Next char arrived: 2
-//Next char arrived: .
+//Sending: 210001
+//Waiting for response.
+//First char arrived: 8
+//Next char arrived: 6
+//Next char arrived: F
+//Next char arrived: 0
 //Next char arrived: 1
-//Next char arrived: 7
-//Next char arrived: V
-//Next char arrived:
-//Next char arrived:
-//Next char arrived: >
-//Found delimiter! Good response
-//12.17V
-//voltage:
-//12.17V
-//Sending: 2105011
-//Waiting for response
-//First char arrived: ?
-//Next char arrived:
-//Next char arrived:
-//Next char arrived: >
-//Found delimiter! Good response
-//?
-//RPM data either failed checksum or did not match request.Returning SANITY_MIN_COOLANT_TEMP_CELSIUS
-//coolant_temp_c:
-//-100
-//Sending: 210C011
-//Waiting for response
-//First char arrived: ?
-//Next char arrived:
-//Next char arrived:
-//Next char arrived: >
-//Found delimiter! Good response
-//?
-//RPM data either failed checksum or did not match request
-//speed:
-//0
-//Sending: ATRV
-//Waiting for response
-//First char arrived: 1
-//Next char arrived: 2
-//Next char arrived: .
+//Next char arrived: 0
+//Next char arrived: 6
 //Next char arrived: 1
+//Next char arrived: 0
+//Next char arrived: 0
+//Next char arrived: 0
 //Next char arrived: 8
-//Next char arrived: V
+//Next char arrived: 3
+//Next char arrived: E
+//Next char arrived: 9
+//Next char arrived: 0
+//Next char arrived: 0
+//Next char arrived: 1
+//Next char arrived: B
+//Next char arrived: E
 //Next char arrived:
 //Next char arrived:
 //Next char arrived: >
 //Found delimiter! Good response
-//12.18V
-//voltage:
-//12.18V
-//Sending: 2105011
-//Waiting for response
-//First char arrived: ?
+//86F0106100083E9001BE
+//Communication established with the ECU
+//Sending: 0210C011
+//Waiting for response.
+//First char arrived: 8
+//Next char arrived: 3
+//Next char arrived: F
+//Next char arrived: 0
+//Next char arrived: 1
+//Next char arrived: 0
+//Next char arrived: 7
+//Next char arrived: F
+//Next char arrived: 0
+//Next char arrived: 2
+//Next char arrived: 1
+//Next char arrived: 1
+//Next char arrived: 1
+//Next char arrived: 5
 //Next char arrived:
 //Next char arrived:
 //Next char arrived: >
 //Found delimiter! Good response
-//?
-//RPM data either failed checksum or did not match request.Returning SANITY_MIN_COOLANT_TEMP_CELSIUS
-//coolant_temp_c:
-//-100
-//Sending: 210C011
-//Waiting for response
-//First char arrived: ?
-//Next char arrived:
-//Next char arrived:
-//Next char arrived: >
-//Found delimiter! Good response
-//?
+//83F0107F021115
 //RPM data either failed checksum or did not match request
-//speed:
+//getEngineCoolantTempC:
+//response length: 7
+//actual checksum mod 256: (DECIMAL)21
+//last byte: (DECIMAL)21
+//parsed response:
+//83 f0 10 7f 02 11 15 speed:
 //0
 //Sending: ATRV
 //Waiting for response
 //First char arrived: 1
-//Next char arrived: 2
+//Next char arrived: 4
 //Next char arrived: .
-//Next char arrived: 1
-//Next char arrived: 7
+//Next char arrived: 2
+//Next char arrived: 0
 //Next char arrived: V
 //Next char arrived:
 //Next char arrived:
 //Next char arrived: >
 //Found delimiter! Good response
-
+//14.20V
+//voltage:
+//14.20V
+//Sending: 02105011
+//Waiting for response.
+//First char arrived: 8
+//Next char arrived: 3
+//Next char arrived: F
+//Next char arrived: 0
+//Next char arrived: 1
+//Next char arrived: 0
+//Next char arrived: 7
+//Next char arrived: F
+//Next char arrived: 0
+//Next char arrived: 2
+//Next char arrived: 1
+//Next char arrived: 1
+//Next char arrived: 1
+//Next char arrived: 5
+//Next char arrived:
+//Next char arrived:
+//Next char arrived: >
+//Found delimiter! Good response
+//83F0107F021115
+//RPM data either failed checksum or did not match request.Returning SANITY_MIN_COOLANT_TEMP_CELSIUS
+//getEngineCoolantTempC:
+//response length: 7
+//actual checksum mod 256: 21
+//last byte: 21
+//parsed response:
+//83 f0 10 7f 02 11 15 coolant_temp_c:
+//-100
+//Sending: 0210C011
+//Waiting for response.
+//First char arrived: 8
+//Next char arrived: 3
+//Next char arrived: F
+//Next char arrived: 0
+//Next char arrived: 1
+//Next char arrived: 0
+//Next char arrived: 7
+//Next char arrived: F
+//Next char arrived: 0
+//Next char arrived: 2
+//Next char arrived: 1
+//Next char arrived: 1
+//Next char arrived: 1
+//Next char arrived: 5
+//Next char arrived:
+//Next char arrived:
+//Next char arrived: >
+//Found delimiter! Good response
+//83F0107F021115
+//RPM data either failed checksum or did not match request
+//getEngineCoolantTempC:
+//response length: 7
+//actual checksum mod 256: (DECIMAL)21
+//last byte: (DECIMAL)21
+//parsed response:
+//83 f0 10 7f 02 11 15 speed:
+//0
+//Sending: ATRV
+//Waiting for response
+//First char arrived: 1
+//Next char arrived: 4
+//Next char arrived: .
+//Next char arrived: 3
+//Next char arrived: 3
+//Next char arrived: V
+//Next char arrived:
+//Next char arrived:
+//Next char arrived: >
+//Found delimiter! Good response
+//14.33V
+//voltage:
+//14.33V
+//Sending: 02105011
+//Waiting for response.
+//First char arrived: 8
+//Next char arrived: 3
+//Next char arrived: F
+//Next char arrived: 0
+//Next char arrived: 1
+//Next char arrived: 0
+//Next char arrived: 7
+//Next char arrived: F
+//Next char arrived: 0
+//Next char arrived: 2
+//Next char arrived: 1
+//Next char arrived: 1
+//Next char arrived: 1
+//Next char arrived: 5
+//Next char arrived:
+//Next char arrived:
+//Next char arrived: >
+//Found delimiter! Good response
+//83F0107F021115
+//RPM data either failed checksum or did not match request.Returning SANITY_MIN_COOLANT_TEMP_CELSIUS
+//getEngineCoolantTempC:
+//response length: 7
+//actual checksum mod 256: 21
+//last byte: 21
+//parsed response:
+//83 f0 10 7f 02 11 15 coolant_temp_c:
+//-100
+//Sending: 0210C011
+//Waiting for response.
+//First char arrived: 8
+//Next char arrived: 3
+//Next char arrived: F
+//Next char arrived: 0
+//Next char arrived: 1
+//Next char arrived: 0
+//Next char arrived: 7
+//Next char arrived: F
+//Next char arrived: 0
+//Next char arrived: 2
+//Next char arrived: 1
+//Next char arrived: 1
+//Next char arrived: 1
+//Next char arrived: 5
+//Next char arrived:
+//Next char arrived:
+//Next char arrived: >
+//Found delimiter! Good response
+//83F0107F021115
+//RPM data either failed checksum or did not match request
+//getEngineCoolantTempC:
+//response length: 7
+//actual checksum mod 256: (DECIMAL)21
+//last byte: (DECIMAL)21
+//parsed response:
+//83 f0 10 7f 02 11 15 speed:
+//0
+//Sending: ATRV
+//Waiting for response
+//First char arrived: 1
+//Next char arrived: 4
+//Next char arrived: .
+//Next char arrived: 2
+//Next char arrived: 2
+//Next char arrived: V
+//Next char arrived:
+//Next char arrived:
+//Next char arrived: >
+//Found delimiter! Good response
+//14.22V
+//voltage:
+//14.22V
+//Sending: 02105011
+//Waiting for response.
+//First char arrived: 8
+//Next char arrived: 3
+//Next char arrived: F
+//Next char arrived: 0
+//Next char arrived: 1
+//Next char arrived: 0
+//Next char arrived: 7
+//Next char arrived: F
+//Next char arrived: 0
+//Next char arrived: 2
+//Next char arrived: 1
+//Next char arrived: 1
+//Next char arrived: 1
+//Next char arrived: 5
+//Next char arrived:
+//Next char arrived:
+//Next char arrived: >
+//Found delimiter! Good response
+//83F0107F021115
+//RPM data either failed checksum or did not match request.Returning SANITY_MIN_COOLANT_TEMP_CELSIUS
+//getEngineCoolantTempC:
+//response length: 7
+//actual checksum mod 256: 21
+//last byte: 21
+//parsed response:
+//83 f0 10 7f 02 11 15 coolant_temp_c:
+//-100
 
 
 

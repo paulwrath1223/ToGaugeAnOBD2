@@ -143,10 +143,10 @@ float KWP2000ELM::getEngineSpeedRpm() {
     DEBUG_PORT.print("getEngineCoolantTempC:\nresponse length: ");
     DEBUG_PORT.println(length);
 
-    DEBUG_PORT.print("actual checksum mod 256: ");
+    DEBUG_PORT.print("actual checksum mod 256: (DECIMAL)");
     DEBUG_PORT.println(actual_checksum % 256);
 
-    DEBUG_PORT.print("last byte: ");
+    DEBUG_PORT.print("last byte: (DECIMAL)");
     DEBUG_PORT.println(byte_array[length-1]);
 
     DEBUG_PORT.println("parsed response:");
