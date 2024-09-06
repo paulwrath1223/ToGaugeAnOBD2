@@ -21,7 +21,7 @@ class KWP2000ELM {
         int hex_string_to_byte_array(const char *hex_str_input);
         float getEngineSpeedRpm();
         int16_t getEngineCoolantTempC();
-        bool init_ECU_connection();
+        void init_ECU_connection();
         bool check_ECU_Connection();
 
 };

@@ -247,11 +247,11 @@ bool KWP2000ELM::check_ECU_Connection(){
     return false;
 }
 /**
- * start communication with the ECU
+ * start communication with the ECU. NEED TO DELAY BY >100ms after calling
  * @param stream stream of the serial port with ELM
- * @return true if communication was successfully established
+ *
  */
-bool KWP2000ELM::init_ECU_connection(){
+void KWP2000ELM::init_ECU_connection(){
     send_command("ATZ");
     send_command("ATE0");
     send_command("ATH1");
@@ -262,6 +262,4 @@ bool KWP2000ELM::init_ECU_connection(){
     send_command("ATAT1");
     send_command("ATSH8210F0");
     send_command("210001");
-    delay(1000);
-    return check_ECU_Connection();
 }

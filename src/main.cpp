@@ -33,7 +33,7 @@ void setup()
 
     DEBUG_PORT.println("Connected to ELM327");
 
-    if(elm.init_ECU_connection()){
+    if(elm.check_ECU_Connection()){
         DEBUG_PORT.println("Communication established with the ECU");
     } else {
         DEBUG_PORT.println("Communication with the ECU was unable to be verified or did not work. Try restarting");
@@ -59,13 +59,13 @@ void loop()
     DEBUG_PORT.println("speed: ");
     DEBUG_PORT.println(rpm);
 
-    delay(100);
+
 
     String voltage = elm.send_command("ATRV");
     DEBUG_PORT.println("voltage: ");
     DEBUG_PORT.println(voltage);
 
-    delay(100);
+
 
     int16_t coolant_temp_c = elm.getEngineCoolantTempC();
     DEBUG_PORT.println("coolant_temp_c: ");
