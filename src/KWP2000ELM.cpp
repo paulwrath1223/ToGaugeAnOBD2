@@ -138,10 +138,23 @@ float KWP2000ELM::getEngineSpeedRpm() {
 
         return result_rpm;
     }
-
-
-
     DEBUG_PORT.println("RPM data either failed checksum or did not match request");
+
+    DEBUG_PORT.print("getEngineCoolantTempC:\nresponse length: ");
+    DEBUG_PORT.println(length);
+
+    DEBUG_PORT.print("actual checksum mod 256: ");
+    DEBUG_PORT.println(actual_checksum % 256);
+
+    DEBUG_PORT.print("last byte: ");
+    DEBUG_PORT.println(byte_array[length-1]);
+
+    DEBUG_PORT.println("parsed response:");
+    for(int i = 0; i<length; i++){
+        DEBUG_PORT.print(byte_to_hex_string(byte_array[i]));
+        DEBUG_PORT.print(' ');
+    }
+
     return -0.0;
 }
 
@@ -179,6 +192,22 @@ int16_t KWP2000ELM::getEngineCoolantTempC() {
 
     DEBUG_PORT.println("RPM data either failed checksum or did not match request."
                        "Returning SANITY_MIN_COOLANT_TEMP_CELSIUS");
+
+    DEBUG_PORT.print("getEngineCoolantTempC:\nresponse length: ");
+    DEBUG_PORT.println(length);
+
+    DEBUG_PORT.print("actual checksum mod 256: ");
+    DEBUG_PORT.println(actual_checksum % 256);
+
+    DEBUG_PORT.print("last byte: ");
+    DEBUG_PORT.println(byte_array[length-1]);
+
+    DEBUG_PORT.println("parsed response:");
+    for(int i = 0; i<length; i++){
+        DEBUG_PORT.print(byte_to_hex_string(byte_array[i]));
+        DEBUG_PORT.print(' ');
+    }
+
     return SANITY_MIN_COOLANT_TEMP_CELSIUS;
 }
 
