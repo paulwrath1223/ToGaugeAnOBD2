@@ -1,4 +1,3 @@
-
 #include "Arduino.h"
 #include <KWP2000ELM.h>
 #include <Stepper.h>
@@ -146,30 +145,23 @@ void loop()
 /**
  *
  * @param coolant_temp (-40..215)
- * @param voltage max 6 chars
+ * @param voltage max 5 chars
  */
-void display_lcd_stuff(const int16_t coolant_temp_in, const char voltage[], const char message[]){
-
-
+void display_lcd_stuff(int16_t coolant_temp_in, char voltage[], char message[]){
     char message_fixed_len[12] = {' '};
-
     strncpy(message_fixed_len, message, 12);
 
+    char voltage_fixed_len[5] = {' '};
+    strncpy(voltage_fixed_len, voltage, 5);
+
     bool was_negative = coolant_temp_in < 0;
-
     uint8_t coolant_temp = abs(coolant_temp_in);
-
     uint8_t digit_1_place = coolant_temp%10;
     coolant_temp/=10;
     uint8_t digit_10_place = coolant_temp%10;
-
-
     char coolant_temp_as_str[3];
-
     coolant_temp_as_str[2] = (char)(digit_1_place+0x30);
     coolant_temp_as_str[1] = (char)(digit_10_place+0x30);
-
-
     if(was_negative){
         coolant_temp_as_str[0] = '-';
     } else {
@@ -203,7 +195,7 @@ void display_lcd_stuff(const int16_t coolant_temp_in, const char voltage[], cons
     lcd.write(LCD_CUSTOM_CHAR_VBAT_L);
     lcd.write(LCD_CUSTOM_CHAR_VBAT_R);
     lcd.write(' ');
-    lcd.printstr(voltage);
+    lcd.printstr(voltage_fixed_len);
     lcd.setCursor(9,1);
     lcd.write(LCD_CUSTOM_CHAR_DIVIDER_LEFT);
     while(message_index<12){
@@ -212,6 +204,7 @@ void display_lcd_stuff(const int16_t coolant_temp_in, const char voltage[], cons
     }
 
 }
+
 
 
 //Connected to ELM327
