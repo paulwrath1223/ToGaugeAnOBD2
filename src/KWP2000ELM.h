@@ -12,7 +12,7 @@ class KWP2000ELM {
         byte byte_array[100] = {0};
         Stream& stream;
 
-        KWP2000ELM(Stream& stream);
+        explicit KWP2000ELM(Stream& stream);
 
         String send_command(const char* input, uint32_t timeout_ms=2000);
         void clear_stream();
