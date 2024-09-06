@@ -1,11 +1,11 @@
-#include "BluetoothSerial.h"
+
 #include "Arduino.h"
 #include "PIDs.h"
 #include <KWP2000ELM.h>
 
-BluetoothSerial SerialBtElm;
 
-#define ELM_PORT   SerialBtElm
+
+#define ELM_PORT Serial1
 #define DEBUG_PORT Serial
 
 
@@ -22,14 +22,14 @@ void setup()
 {
 
     DEBUG_PORT.begin(115200);
-    ELM_PORT.begin("ArduHUD", true);
+    ELM_PORT.begin(115200, SERIAL_8N1);
+    DEBUG_PORT.println("waiting 10 seconds");
 
-
-    if (!ELM_PORT.connect("VEEPEAK"))
-    {
-        DEBUG_PORT.println("Couldn't connect to OBD scanner - Phase 1");
-        while(1);
+    for(uint8_t i = 0; i < 10; i++){
+        DEBUG_PORT.print(".");
+        delay(1000);
     }
+    DEBUG_PORT.println("BEGIN");
 
     DEBUG_PORT.println("Connected to ELM327");
 
