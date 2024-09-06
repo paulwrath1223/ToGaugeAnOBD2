@@ -25,8 +25,9 @@ String KWP2000ELM::send_command(const char* input, uint32_t timeout_ms) {
     String output = "";
     char current_char = '\0';
     clear_stream();
-    stream.print(input);
-    stream.print("\r\n");
+    stream.write(input);
+    stream.write('\r');
+
 #ifdef DO_SEND_COMMAND_DEBUG
     DEBUG_PORT.print("Sending: "); DEBUG_PORT.println(input);
 #endif
