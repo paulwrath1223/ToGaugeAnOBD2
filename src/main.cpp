@@ -25,10 +25,6 @@ void setup()
     ELM_PORT.begin(115200, SERIAL_8N1);
     DEBUG_PORT.println("waiting 3 seconds");
 
-    for(uint8_t i = 0; i < 3; i++){
-        DEBUG_PORT.print(".");
-        delay(1000);
-    }
     DEBUG_PORT.println("BEGIN");
 
     DEBUG_PORT.println("Connected to ELM327");
