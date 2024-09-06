@@ -179,21 +179,37 @@ int16_t KWP2000ELM::getEngineCoolantTempC() {
 
 bool KWP2000ELM::check_ECU_Connection(){
     String result = send_command("210001");
+    // 86 F0 10 61 00 08 3E 90 01 BE
 
     int length = hex_string_to_byte_array(result.c_str());
+
 
     int actual_checksum = 0;
 
     for(int i = 0; i<length-1; i++){
         actual_checksum += byte_array[i];
     }
+
     if(byte_array[length-1] == (actual_checksum % 256) && byte_array[4] == 0x00){
         return true;
     }
-
-
-
     DEBUG_PORT.println("ECU Connection Failed");
+
+    DEBUG_PORT.print("check_ECU_Connection:\nresponse length: ");
+    DEBUG_PORT.println(length);
+
+    DEBUG_PORT.print("actual checksum mod 256: ");
+    DEBUG_PORT.println(actual_checksum % 256);
+
+    DEBUG_PORT.print("last byte: ");
+    DEBUG_PORT.println(byte_array[length-1]);
+
+    DEBUG_PORT.println("parsed response:");
+    for(int i = 0; i<length; i++){
+        DEBUG_PORT.print(byte_to_hex_string(byte_array[i]));
+        DEBUG_PORT.print(' ');
+    }
+
     return false;
 }
 /**

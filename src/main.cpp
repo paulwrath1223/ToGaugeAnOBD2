@@ -71,16 +71,115 @@ void loop()
 
 }
 
-
-
-
-
-//getPID called with PID d
-//Generated request:
-//Sending:
-//Waiting for response...
-//First char arrived: 8
-//Next char arrived: 4
+//Connected to ELM327
+//Sending: ATZ
+//Waiting for response
+//First char arrived: E
+//Next char arrived: L
+//Next char arrived: M
+//Next char arrived: 3
+//Next char arrived: 2
+//Next char arrived: 7
+//Next char arrived:
+//Next char arrived: v
+//Next char arrived: 1
+//Next char arrived: .
+//Next char arrived: 5
+//Next char arrived:
+//Next char arrived:
+//Next char arrived: >
+//Found delimiter! Good response
+//ELM327 v1.5
+//Sending: ATE0
+//Waiting for response
+//First char arrived: O
+//Next char arrived: K
+//Next char arrived:
+//Next char arrived:
+//Next char arrived: >
+//Found delimiter! Good response
+//OK
+//Sending: ATH1
+//Waiting for response
+//First char arrived: O
+//Next char arrived: K
+//Next char arrived:
+//Next char arrived:
+//Next char arrived: >
+//Found delimiter! Good response
+//OK
+//Sending: ATSP5
+//Waiting for response
+//First char arrived: O
+//Next char arrived: K
+//Next char arrived:
+//Next char arrived:
+//Next char arrived: >
+//Found delimiter! Good response
+//OK
+//Sending: ATST64
+//Waiting for response
+//First char arrived: ?
+//Next char arrived:
+//Next char arrived:
+//Next char arrived: >
+//Found delimiter! Good response
+//?
+//Sending: ATS0
+//Waiting for response
+//First char arrived: O
+//Next char arrived: K
+//Next char arrived:
+//Next char arrived:
+//Next char arrived: >
+//Found delimiter! Good response
+//OK
+//Sending: ATM0
+//Waiting for response
+//First char arrived: O
+//Next char arrived: K
+//Next char arrived:
+//Next char arrived:
+//Next char arrived: >
+//Found delimiter! Good response
+//OK
+//Sending: ATAT1
+//Waiting for response
+//First char arrived: ?
+//Next char arrived:
+//Next char arrived:
+//Next char arrived: >
+//Found delimiter! Good response
+//?
+//Sending: ATSH8210F0
+//Waiting for response
+//First char arrived: O
+//Next char arrived: K
+//Next char arrived:
+//Next char arrived:
+//Next char arrived: >
+//Found delimiter! Good response
+//OK
+//Sending: 210001
+//Waiting for response.....
+//First char arrived: B
+//Next char arrived: U
+//Next char arrived: S
+//Next char arrived:
+//Next char arrived: I
+//Next char arrived: N
+//Next char arrived: I
+//Next char arrived: T
+//Next char arrived: :
+//Next char arrived:
+//Next char arrived: .
+//Next char arrived: .
+//Next char arrived: .
+//Next char arrived: O
+//Next char arrived: K
+//Next char arrived:
+//Next char arrived: 8
+//Next char arrived: 6
 //Next char arrived: F
 //Next char arrived: 0
 //Next char arrived: 1
@@ -88,28 +187,125 @@ void loop()
 //Next char arrived: 6
 //Next char arrived: 1
 //Next char arrived: 0
-//Next char arrived: C
 //Next char arrived: 0
 //Next char arrived: 0
+//Next char arrived: 8
+//Next char arrived: 3
+//Next char arrived: E
+//Next char arrived: 9
 //Next char arrived: 0
 //Next char arrived: 0
-//Next char arrived: F
 //Next char arrived: 1
+//Next char arrived: B
+//Next char arrived: E
 //Next char arrived:
 //Next char arrived:
 //Next char arrived: >
 //Found delimiter! Good response
-//84F010610C0000F1
-//Got response: 84F010610C0000F1
-//response as bytes:84
-//f0
-//10
-//61
-//c
+//86F0106100083E9001BE
+//ECU Connection Failed
+//Communication with the ECU was unable to be verified or did not work. Try restarting
+//Sending: 210C011
+//Waiting for response
+//First char arrived: ?
+//Next char arrived:
+//Next char arrived:
+//Next char arrived: >
+//Found delimiter! Good response
+//?
+//RPM data either failed checksum or did not match request
+//speed:
 //0
+//Sending: ATRV
+//Waiting for response
+//First char arrived: 1
+//Next char arrived: 2
+//Next char arrived: .
+//Next char arrived: 1
+//Next char arrived: 7
+//Next char arrived: V
+//Next char arrived:
+//Next char arrived:
+//Next char arrived: >
+//Found delimiter! Good response
+//12.17V
+//voltage:
+//12.17V
+//Sending: 2105011
+//Waiting for response
+//First char arrived: ?
+//Next char arrived:
+//Next char arrived:
+//Next char arrived: >
+//Found delimiter! Good response
+//?
+//RPM data either failed checksum or did not match request.Returning SANITY_MIN_COOLANT_TEMP_CELSIUS
+//coolant_temp_c:
+//-100
+//Sending: 210C011
+//Waiting for response
+//First char arrived: ?
+//Next char arrived:
+//Next char arrived:
+//Next char arrived: >
+//Found delimiter! Good response
+//?
+//RPM data either failed checksum or did not match request
+//speed:
 //0
-//f1
+//Sending: ATRV
+//Waiting for response
+//First char arrived: 1
+//Next char arrived: 2
+//Next char arrived: .
+//Next char arrived: 1
+//Next char arrived: 8
+//Next char arrived: V
+//Next char arrived:
+//Next char arrived:
+//Next char arrived: >
+//Found delimiter! Good response
+//12.18V
+//voltage:
+//12.18V
+//Sending: 2105011
+//Waiting for response
+//First char arrived: ?
+//Next char arrived:
+//Next char arrived:
+//Next char arrived: >
+//Found delimiter! Good response
+//?
+//RPM data either failed checksum or did not match request.Returning SANITY_MIN_COOLANT_TEMP_CELSIUS
+//coolant_temp_c:
+//-100
+//Sending: 210C011
+//Waiting for response
+//First char arrived: ?
+//Next char arrived:
+//Next char arrived:
+//Next char arrived: >
+//Found delimiter! Good response
+//?
+//RPM data either failed checksum or did not match request
+//speed:
 //0
+//Sending: ATRV
+//Waiting for response
+//First char arrived: 1
+//Next char arrived: 2
+//Next char arrived: .
+//Next char arrived: 1
+//Next char arrived: 7
+//Next char arrived: V
+//Next char arrived:
+//Next char arrived:
+//Next char arrived: >
+//Found delimiter! Good response
+
+
+
+
 
 
 
