@@ -4,8 +4,11 @@
 
 #include "KWP2000ELM.h"
 
-#define ELM_PORT   SerialBtElm
 #define DEBUG_PORT Serial
+#define ENGINE_RPM_COMMAND "0210C011"
+#define ENGINE_COOLANT_COMMAND "02105011"
+
+
 
 #define SANITY_MAX_RPM 9000 // the highest RPM value to accept. higher values will be clamped and issue warnings.
 #define SANITY_MIN_COOLANT_TEMP_CELSIUS (-100) // the highest RPM value to accept. higher values will be clamped and issue warnings.
@@ -61,6 +64,7 @@ String KWP2000ELM::send_command(const char* input, uint32_t timeout_ms) {
         if(current_char == '>'){
 #ifdef DO_SEND_COMMAND_DEBUG
             DEBUG_PORT.println("Found delimiter! Good response");
+            output.trim();
 #endif
         } else {
 #ifdef DO_SEND_COMMAND_DEBUG
@@ -107,7 +111,7 @@ int KWP2000ELM::hex_string_to_byte_array(const char *hex_str_input) {
 }
 
 float KWP2000ELM::getEngineSpeedRpm() {
-    String result = send_command("210C011");
+    String result = send_command(ENGINE_RPM_COMMAND);
 
     // 84 F0 10 61 0C 00 00 F1
     int length = hex_string_to_byte_array(result.c_str());
@@ -142,7 +146,7 @@ float KWP2000ELM::getEngineSpeedRpm() {
 }
 
 int16_t KWP2000ELM::getEngineCoolantTempC() {
-    String result = send_command("2105011");
+    String result = send_command(ENGINE_COOLANT_COMMAND);
 
     // 83 F0 10 61 05 7E 67
     int length = hex_string_to_byte_array(result.c_str());
@@ -228,5 +232,7 @@ bool KWP2000ELM::init_ECU_connection(){
     send_command("ATM0");
     send_command("ATAT1");
     send_command("ATSH8210F0");
+    send_command("210001");
+    delay(1000);
     return check_ECU_Connection();
 }
