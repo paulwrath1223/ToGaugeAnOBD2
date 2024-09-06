@@ -65,8 +65,8 @@ String KWP2000ELM::send_command(const char* input, uint32_t timeout_ms) {
         if(current_char == '>'){
 #ifdef DO_SEND_COMMAND_DEBUG
             DEBUG_PORT.println("Found delimiter! Good response");
-            output.trim();
 #endif
+            output.trim();
         } else {
 #ifdef DO_SEND_COMMAND_DEBUG
             DEBUG_PORT.println("No Delimiter, Timed out after received at least one byte.");

@@ -52,7 +52,7 @@ String global_voltage;
 int16_t coolant_temp_c;
 bool bright_lights = false;
 
-void display_lcd_stuff(int16_t coolant_temp_in, const char voltage[], const char message[]);
+void display_lcd_stuff(int16_t coolant_temp_in, char const voltage[], char const message[]);
 
 KWP2000ELM elm = KWP2000ELM(ELM_PORT);
 
@@ -147,7 +147,7 @@ void loop()
  * @param coolant_temp (-40..215)
  * @param voltage max 5 chars
  */
-void display_lcd_stuff(int16_t coolant_temp_in, char voltage[], char message[]){
+void display_lcd_stuff(int16_t coolant_temp_in, char const voltage[], char const message[]){
     char message_fixed_len[12] = {' '};
     strncpy(message_fixed_len, message, 12);
 
