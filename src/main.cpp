@@ -4,8 +4,6 @@
 #include <Adafruit_NeoPixel.h>
 #include <Gauge.h>
 #include <LiquidCrystal_I2C.h>
-#include "TimerInterrupt.h"
-
 
 
 #define ELM_PORT Serial1
@@ -70,6 +68,8 @@ String current_error_msg = ERROR_MSG_NONE;
 #define USE_TIMER_4     true
 #define USE_TIMER_5     false
 
+#include "TimerInterrupt.h"
+
 #define TIMER_INTERRUPT_USING_ATMEGA_32U4 true
 
 // Init timer ITimer1
@@ -104,9 +104,9 @@ void setup()
     lcd.createChar(LCD_CUSTOM_CHAR_VBAT_R, VbatR);
 
     if (ITimer4.attachInterruptInterval(TIMER_INTERVAL_MS, tick_stepper))
-        Serial.println("Starting  ITimer OK, millis() = " + String(millis()));
+        DEBUG_PORT.println("Starting  ITimer OK, millis() = " + String(millis()));
     else
-        Serial.println("Can't set ITimer. Select another freq. or timer");
+        DEBUG_PORT.println("Can't set ITimer. Select another freq. or timer");
 
     stepper.setSpeed(50);
 
