@@ -161,7 +161,7 @@ float KWP2000ELM::getEngineSpeedRpm() {
         DEBUG_PORT.print(' ');
     }
 #endif
-    return -0.0;
+    return -1.0f;
 }
 
 int16_t KWP2000ELM::getEngineCoolantTempC() {

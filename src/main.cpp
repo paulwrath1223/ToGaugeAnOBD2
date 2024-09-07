@@ -4,6 +4,7 @@
 #include <Adafruit_NeoPixel.h>
 #include <Gauge.h>
 #include <LiquidCrystal_I2C.h>
+#include "TimerInterrupt.h"
 
 
 
@@ -30,7 +31,14 @@
 #define LCD_CUSTOM_CHAR_VBAT_L 5
 #define LCD_CUSTOM_CHAR_VBAT_R 6
 
+#define TIMER_INTERVAL_MS 2L
+
 const char ERROR_MSG_NONE[] = "No    Errors";
+const char ERROR_MSG_LOW_VOLTAGE[] = "LowBatVoltag";
+const char ERROR_MSG_BAD_RPM_DATA[] = "Bad Rpm Data";
+const char ERROR_MSG_BAD_COOLANT_TEMP_DATA[] = "Bad TempData";
+
+#define LOW_VOLTAGE_THRESHOLD 11
 
 Stepper stepper(STEPS_PER_315, 4, 5, 6, 7);
 Adafruit_NeoPixel ring = Adafruit_NeoPixel(24, 15);
@@ -48,19 +56,37 @@ uint8_t VbatR[8] = { B00000, B00110, B11111, B00001, B01101, B00001, B00001, B11
 const uint32_t white = Adafruit_NeoPixel::Color(NEOP_BRIGHT, NEOP_BRIGHT, NEOP_BRIGHT);
 const uint32_t grey = Adafruit_NeoPixel::Color(NEOP_DIM, NEOP_DIM, NEOP_DIM);
 uint32_t rpm = 0;
+float raw_rpm = 0.0;
+volatile int32_t stepper_delta = 0;
+uint8_t loop_counter = 0;
 String global_voltage;
 int16_t coolant_temp_c;
 bool bright_lights = true;
+String current_error_msg = ERROR_MSG_NONE;
 
+#define USE_TIMER_1     false
+#define USE_TIMER_2     false
+#define USE_TIMER_3     false
+#define USE_TIMER_4     true
+#define USE_TIMER_5     false
+
+#define TIMER_INTERRUPT_USING_ATMEGA_32U4 true
+
+// Init timer ITimer1
+
+
+void tick_stepper();
 void display_lcd_stuff(int16_t coolant_temp_in, char const voltage[], char const message[]);
 
 KWP2000ELM elm = KWP2000ELM(ELM_PORT);
 
 void setup()
 {
+
+    ITimer4.init();
+
     DEBUG_PORT.begin(115200);
     ELM_PORT.begin(115200, SERIAL_8N1);
-
 
 
     lcd.init();
@@ -76,6 +102,11 @@ void setup()
     lcd.createChar(LCD_CUSTOM_CHAR_TEMP_R, TempR);
     lcd.createChar(LCD_CUSTOM_CHAR_VBAT_L, VbatL);
     lcd.createChar(LCD_CUSTOM_CHAR_VBAT_R, VbatR);
+
+    if (ITimer4.attachInterruptInterval(TIMER_INTERVAL_MS, tick_stepper))
+        Serial.println("Starting  ITimer OK, millis() = " + String(millis()));
+    else
+        Serial.println("Can't set ITimer. Select another freq. or timer");
 
     stepper.setSpeed(50);
 
@@ -103,44 +134,76 @@ void setup()
 
 void loop()
 {
-    rpm = (uint32_t)elm.getEngineSpeedRpm();
+    current_error_msg = ERROR_MSG_NONE;
+
+    raw_rpm = elm.getEngineSpeedRpm();
+    rpm = (uint32_t)raw_rpm;
     DEBUG_PORT.println("speed: ");
     DEBUG_PORT.println(rpm);
 
-    global_voltage = elm.send_command("ATRV");
-    DEBUG_PORT.println("voltage: ");
-    DEBUG_PORT.println(global_voltage);
-    global_voltage.trim();
+    if(raw_rpm < 0){
+        current_error_msg = ERROR_MSG_BAD_RPM_DATA;
+    }
 
-    coolant_temp_c = elm.getEngineCoolantTempC();
-    DEBUG_PORT.println("coolant_temp_c: ");
-    DEBUG_PORT.println(coolant_temp_c);
+    if(loop_counter << 4 == 0){
+        global_voltage = elm.send_command("ATRV");
+        DEBUG_PORT.println("voltage: ");
+        DEBUG_PORT.println(global_voltage);
+        global_voltage.trim();
+
+        coolant_temp_c = elm.getEngineCoolantTempC();
+        DEBUG_PORT.println("coolant_temp_c: ");
+        DEBUG_PORT.println(coolant_temp_c);
+
+        if(coolant_temp_c < -40){
+            current_error_msg = ERROR_MSG_BAD_COOLANT_TEMP_DATA;
+        }
+
+    }
 
     bright_lights = analogRead(CLUSTER_BACKLIGHT_PIN) < CLUSTER_BACKLIGHT_LOW_THRESHOLD;
 
-    display_lcd_stuff(coolant_temp_c, global_voltage.c_str(), ERROR_MSG_NONE);
+    display_lcd_stuff(coolant_temp_c, global_voltage.c_str(), current_error_msg.c_str());
 
-    int32_t delta;
+
     if(bright_lights){
         analogWrite(LCD_BACKLIGHT_PIN, LCD_BACKLIGHT_BRIGHT);
         for(int i = 0; i < 5; i++){
             ring.setPixelColor(10+i, white);
         }
-        delta = tach.set_val(rpm, NEOP_BRIGHT);
+        stepper_delta += tach.set_val(rpm, NEOP_BRIGHT);
     } else {
         analogWrite(LCD_BACKLIGHT_PIN, LCD_BACKLIGHT_DIM);
         for(int i = 0; i < 5; i++){
             ring.setPixelColor(10+i, grey);
         }
-        delta = tach.set_val(rpm, NEOP_DIM);
+        stepper_delta += tach.set_val(rpm, NEOP_DIM);
     }
 
     for(int i = 0; i < 18; i++){
         ring.setPixelColor((i+15)%24, tach.get_color_at_index(i));
     }
     ring.show();
-    stepper.step(delta);
+    stepper.step(stepper_delta);
+    stepper_delta = 0;
+
+    loop_counter++;
 }
+
+void tick_stepper(){
+    if(stepper_delta == 0){
+        return; // already at correct position
+    }
+    if(stepper_delta > 0){
+        stepper.step(1);
+        stepper_delta += 1;
+    } else {
+        stepper.step(-1);
+        stepper_delta -= 1;
+    }
+
+}
+
 
 /**
  *
