@@ -20,7 +20,7 @@
 #define LCD_BACKLIGHT_DIM 220
 
 #define CLUSTER_BACKLIGHT_PIN A0
-#define CLUSTER_BACKLIGHT_HIGH_THRESHOLD 200
+#define CLUSTER_BACKLIGHT_LOW_THRESHOLD 500
 
 #define LCD_CUSTOM_CHAR_DEGREES_C 0 // mapping for LCD lib between custom char data and index
 #define LCD_CUSTOM_CHAR_TEMP_L 1
@@ -50,7 +50,7 @@ const uint32_t grey = Adafruit_NeoPixel::Color(NEOP_DIM, NEOP_DIM, NEOP_DIM);
 uint32_t rpm = 0;
 String global_voltage;
 int16_t coolant_temp_c;
-bool bright_lights = false;
+bool bright_lights = true;
 
 void display_lcd_stuff(int16_t coolant_temp_in, char const voltage[], char const message[]);
 
@@ -116,7 +116,7 @@ void loop()
     DEBUG_PORT.println("coolant_temp_c: ");
     DEBUG_PORT.println(coolant_temp_c);
 
-    bright_lights = analogRead(CLUSTER_BACKLIGHT_PIN) > CLUSTER_BACKLIGHT_HIGH_THRESHOLD;
+    bright_lights = analogRead(CLUSTER_BACKLIGHT_PIN) < CLUSTER_BACKLIGHT_LOW_THRESHOLD;
 
     display_lcd_stuff(coolant_temp_c, global_voltage.c_str(), ERROR_MSG_NONE);
 
