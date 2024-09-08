@@ -15,7 +15,7 @@
 #define SANITY_MAX_COOLANT_TEMP_CELSIUS 250 // the highest RPM value to accept. higher values will be clamped and issue warnings.
 
 #define DO_SEND_COMMAND_DEBUG
-#define DO_DATA_AQUISITION_DEBUG
+#define DO_DATA_ACQUISITION_DEBUG
 
 KWP2000ELM::KWP2000ELM(Stream& stream): stream(stream) {}
 
@@ -127,13 +127,13 @@ float KWP2000ELM::getEngineSpeedRpm() {
         // (255*BA[5] + BA[6])/4
 
         if(result_rpm>SANITY_MAX_RPM){
-#ifdef DO_DATA_AQUISITION_DEBUG
+#ifdef DO_DATA_ACQUISITION_DEBUG
             DEBUG_PORT.println("RPM data returned value over SANITY_MAX_RPM. clamping and returning SANITY_MAX_RPM");
 #endif
             return 9000.0;
         }
         if(result_rpm<0){
-#ifdef DO_DATA_AQUISITION_DEBUG
+#ifdef DO_DATA_ACQUISITION_DEBUG
             DEBUG_PORT.println("RPM data returned a negative number!! "
                                "This physically isn't possible and must be a problem with my code, "
                                "but clamping and returning 0 nonetheless");
@@ -143,7 +143,7 @@ float KWP2000ELM::getEngineSpeedRpm() {
 
         return result_rpm;
     }
-#ifdef DO_DATA_AQUISITION_DEBUG
+#ifdef DO_DATA_ACQUISITION_DEBUG
     DEBUG_PORT.println("RPM data either failed checksum or did not match request");
 
     DEBUG_PORT.print("getEngineCoolantTempC:\nresponse length: ");
@@ -181,14 +181,14 @@ int16_t KWP2000ELM::getEngineCoolantTempC() {
 
 
         if(result_celsius > SANITY_MAX_COOLANT_TEMP_CELSIUS){
-#ifdef DO_DATA_AQUISITION_DEBUG
+#ifdef DO_DATA_ACQUISITION_DEBUG
             DEBUG_PORT.println("Engine coolant temp data returned value over SANITY_MAX_COOLANT_TEMP_CELSIUS."
                                "clamping and returning SANITY_MAX_COOLANT_TEMP_CELSIUS");
 #endif
             return SANITY_MAX_COOLANT_TEMP_CELSIUS;
         }
         if(result_celsius < SANITY_MIN_COOLANT_TEMP_CELSIUS){
-#ifdef DO_DATA_AQUISITION_DEBUG
+#ifdef DO_DATA_ACQUISITION_DEBUG
             DEBUG_PORT.println("Engine coolant temp data returned value under SANITY_MIN_COOLANT_TEMP_CELSIUS."
                                "clamping and returning SANITY_MIN_COOLANT_TEMP_CELSIUS");
 #endif
@@ -198,7 +198,7 @@ int16_t KWP2000ELM::getEngineCoolantTempC() {
         return result_celsius;
     }
 
-#ifdef DO_DATA_AQUISITION_DEBUG
+#ifdef DO_DATA_ACQUISITION_DEBUG
     DEBUG_PORT.println("RPM data either failed checksum or did not match request."
                        "Returning SANITY_MIN_COOLANT_TEMP_CELSIUS");
 
@@ -236,7 +236,7 @@ bool KWP2000ELM::check_ECU_Connection(){
     if(byte_array[length-1] == (actual_checksum % 256) && byte_array[4] == 0x00){
         return true;
     }
-#ifdef DO_DATA_AQUISITION_DEBUG
+#ifdef DO_DATA_ACQUISITION_DEBUG
     DEBUG_PORT.println("ECU Connection Failed");
 
     DEBUG_PORT.print("check_ECU_Connection:\nresponse length: ");
