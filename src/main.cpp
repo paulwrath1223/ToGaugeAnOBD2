@@ -237,7 +237,7 @@ void tick_stepper(){
  * @param voltage max 5 chars
  */
 void display_lcd_stuff(int16_t coolant_temp_in, char const voltage[], char const message[]){
-    char message_fixed_len[12] = {' '};
+    char message_fixed_len[13] = {'\0'};
     strncpy(message_fixed_len, message, 12);
 
     char voltage_fixed_len[5] = {' '};
