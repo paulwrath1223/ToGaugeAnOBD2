@@ -14,7 +14,7 @@
 #define SANITY_MIN_COOLANT_TEMP_CELSIUS (-100) // the highest RPM value to accept. higher values will be clamped and issue warnings.
 #define SANITY_MAX_COOLANT_TEMP_CELSIUS 250 // the highest RPM value to accept. higher values will be clamped and issue warnings.
 
-//#define DO_SEND_COMMAND_DEBUG
+#define DO_SEND_COMMAND_DEBUG
 #define DO_DATA_AQUISITION_DEBUG
 
 KWP2000ELM::KWP2000ELM(Stream& stream): stream(stream) {}
