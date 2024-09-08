@@ -33,9 +33,9 @@
 #define STEPPER_PIN_3 6
 #define STEPPER_PIN_4 7
 
-#define STEPPER_MIN_DELAY_MICROS 35
+#define STEPPER_MIN_DELAY_MICROS 2000
 
-#define TIMER_INTERVAL_MS 16L
+#define TIMER_INTERVAL_MS 4
 
 const char ERROR_MSG_NONE[] = "No    Errors";
 const char ERROR_MSG_LOW_VOLTAGE[] = "LowBatVoltag";
@@ -165,7 +165,7 @@ void loop()
     }
 
     if(abs(stepper_delta) > 100){
-        DEBUG_PORT.print("stepper_delta excessive, possible error if this keeps reoccurring");
+        DEBUG_PORT.print("stepper_delta excessive, possible error if this keeps reoccurring. stepper_delta = ");
         DEBUG_PORT.println(stepper_delta);
         current_error_msg = ERROR_MSG_STEPPER_DELTA;
     }
@@ -210,23 +210,25 @@ void loop()
         stepper_delta += tach.set_val(rpm, NEOP_DIM);
     }
 
+    DEBUG_PORT.print("tach.position_steps: ");
+    DEBUG_PORT.println(tach.position_steps);
+
     for(int i = 0; i < 18; i++){
         ring.setPixelColor((i+15)%24, tach.get_color_at_index(i));
     }
     ring.show();
     loop_counter++;
-
-    DEBUG_PORT.print("stepper_delta: ");
-    DEBUG_PORT.println(stepper_delta);
 }
 
 void tick_stepper(){
     if(stepper_delta > 0) {
         stepper_single_step(true);
-        stepper_delta -= 1;
+        DEBUG_PORT.println("tick_stepper steps forward at millis = ");
+        stepper_delta--;
     } else if (stepper_delta < 0){
         stepper_single_step(false);
-        stepper_delta += 1;
+        DEBUG_PORT.println("tick_stepper steps backward at millis = ");
+        stepper_delta++;
     }
 }
 
@@ -304,10 +306,10 @@ void do_n_steps(int16_t steps_to_do){
     uint16_t steps_no_direction = abs(steps_to_do);
     uint16_t steps_done = 0;
     while(steps_done < steps_no_direction){
-        while(last_step_micros+STEPPER_MIN_DELAY_MICROS > micros()){
-        }
+        while(last_step_micros+STEPPER_MIN_DELAY_MICROS > micros()){}
         stepper_single_step(is_forward);
         steps_done++;
+        last_step_micros = micros();
     }
 }
 
@@ -316,6 +318,7 @@ void do_n_steps(int16_t steps_to_do){
  * @param is_forwards the direction. true means forwards (positive), false means backwards (negative)
  */
 void stepper_single_step(bool is_forwards){
+    DEBUG_PORT.println("single step called");
     if(is_forwards){
         stepper_current_step = (stepper_current_step+1)%4;
     } else {

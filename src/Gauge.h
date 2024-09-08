@@ -10,12 +10,12 @@
 namespace Gauge {
 
     class Gauge{
-        uint16_t position_steps;
-        bool calibrated;
         uint32_t color_array[24] = {0};
-        uint32_t val;
 
     public:
+        uint32_t val;
+        uint16_t position_steps;
+        bool calibrated;
         uint16_t max_steps;
         uint16_t min_steps;
         uint32_t max_val;

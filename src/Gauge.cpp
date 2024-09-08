@@ -77,7 +77,7 @@ namespace Gauge {
             // map(value, fromLow, fromHigh, toLow, toHigh)
                     min_steps,
                     max_steps);
-            int32_t delta_steps = target_step_pos - this->position_steps;
+            int32_t delta_steps = (int32_t)target_step_pos - this->position_steps;
             this->position_steps = target_step_pos;
             return delta_steps;
         } else {
