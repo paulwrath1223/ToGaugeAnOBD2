@@ -223,11 +223,9 @@ void loop()
 void tick_stepper(){
     if(stepper_delta > 0) {
         stepper_single_step(true);
-        DEBUG_PORT.println("tick_stepper steps forward at millis = ");
         stepper_delta--;
     } else if (stepper_delta < 0){
         stepper_single_step(false);
-        DEBUG_PORT.println("tick_stepper steps backward at millis = ");
         stepper_delta++;
     }
 }
@@ -318,7 +316,6 @@ void do_n_steps(int16_t steps_to_do){
  * @param is_forwards the direction. true means forwards (positive), false means backwards (negative)
  */
 void stepper_single_step(bool is_forwards){
-    DEBUG_PORT.println("single step called");
     if(is_forwards){
         stepper_current_step = (stepper_current_step+1)%4;
     } else {
