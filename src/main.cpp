@@ -29,7 +29,7 @@
 #define LCD_CUSTOM_CHAR_VBAT_L 5
 #define LCD_CUSTOM_CHAR_VBAT_R 6
 
-#define TIMER_INTERVAL_MS 2L
+#define TIMER_INTERVAL_MS 4L
 
 const char ERROR_MSG_NONE[] = "No    Errors";
 const char ERROR_MSG_LOW_VOLTAGE[] = "LowBatVoltag";
@@ -61,6 +61,8 @@ String global_voltage;
 int16_t coolant_temp_c;
 bool bright_lights = true;
 String current_error_msg = ERROR_MSG_NONE;
+uint64_t last_request_millis;
+
 
 #define USE_TIMER_1     false
 #define USE_TIMER_2     false
@@ -108,7 +110,7 @@ void setup()
     else
         DEBUG_PORT.println("Can't set ITimer. Select another freq. or timer");
 
-    stepper.setSpeed(50);
+
 
     DEBUG_PORT.println("Connected to ELM327");
     elm.init_ECU_connection();
@@ -116,7 +118,10 @@ void setup()
     lcd.home();
     lcd.print("conecting to ECU");
 
+
+    stepper.setSpeed(50);
     stepper.step(tach.calibrate());
+    stepper.setSpeed(5000);
 
     if(elm.check_ECU_Connection()){
         DEBUG_PORT.println("Communication established with the ECU");
@@ -129,11 +134,17 @@ void setup()
         lcd.print("failed to conect");
         DEBUG_PORT.println("Communication with the ECU was unable to be verified or did not work. Try restarting");
     }
+    last_request_millis = millis();
 }
 
 
 void loop()
 {
+
+    while((last_request_millis + 100) > millis()){
+
+    }
+
     current_error_msg = ERROR_MSG_NONE;
 
     raw_rpm = elm.getEngineSpeedRpm();
@@ -145,7 +156,7 @@ void loop()
         current_error_msg = ERROR_MSG_BAD_RPM_DATA;
     }
 
-    if(loop_counter << 4 == 0){
+    if((loop_counter & B0001111) == 0){
         global_voltage = elm.send_command("ATRV");
         DEBUG_PORT.println("voltage: ");
         DEBUG_PORT.println(global_voltage);
@@ -159,11 +170,14 @@ void loop()
             current_error_msg = ERROR_MSG_BAD_COOLANT_TEMP_DATA;
         }
 
+
+        display_lcd_stuff(coolant_temp_c, global_voltage.c_str(), current_error_msg.c_str());
     }
+    last_request_millis = millis();
 
     bright_lights = analogRead(CLUSTER_BACKLIGHT_PIN) < CLUSTER_BACKLIGHT_LOW_THRESHOLD;
 
-    display_lcd_stuff(coolant_temp_c, global_voltage.c_str(), current_error_msg.c_str());
+
 
 
     if(bright_lights){
@@ -184,24 +198,17 @@ void loop()
         ring.setPixelColor((i+15)%24, tach.get_color_at_index(i));
     }
     ring.show();
-    stepper.step(stepper_delta);
-    stepper_delta = 0;
-
     loop_counter++;
 }
 
 void tick_stepper(){
-    if(stepper_delta == 0){
-        return; // already at correct position
-    }
-    if(stepper_delta > 0){
+    if(stepper_delta > 0) {
         stepper.step(1);
-        stepper_delta += 1;
-    } else {
+        stepper_delta += -1;
+    } else if (stepper_delta < 0){
         stepper.step(-1);
-        stepper_delta -= 1;
+        stepper_delta += 1;
     }
-
 }
 
 
