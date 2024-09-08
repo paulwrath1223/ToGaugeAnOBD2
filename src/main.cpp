@@ -1,6 +1,5 @@
 #include "Arduino.h"
 #include <KWP2000ELM.h>
-#include <Stepper.h>
 #include <Adafruit_NeoPixel.h>
 #include <Gauge.h>
 #include <LiquidCrystal_I2C.h>
@@ -29,16 +28,23 @@
 #define LCD_CUSTOM_CHAR_VBAT_L 5
 #define LCD_CUSTOM_CHAR_VBAT_R 6
 
+#define STEPPER_PIN_1 4
+#define STEPPER_PIN_2 5
+#define STEPPER_PIN_3 6
+#define STEPPER_PIN_4 7
+
+#define STEPPER_MIN_DELAY_MICROS 35
+
 #define TIMER_INTERVAL_MS 16L
 
 const char ERROR_MSG_NONE[] = "No    Errors";
 const char ERROR_MSG_LOW_VOLTAGE[] = "LowBatVoltag";
 const char ERROR_MSG_BAD_RPM_DATA[] = "Bad Rpm Data";
 const char ERROR_MSG_BAD_COOLANT_TEMP_DATA[] = "Bad TempData";
+const char ERROR_MSG_STEPPER_DELTA[] = "StpDltExesiv";
 
 #define LOW_VOLTAGE_THRESHOLD 11
 
-Stepper stepper(STEPS_PER_315, 4, 5, 6, 7);
 Adafruit_NeoPixel ring = Adafruit_NeoPixel(24, 15);
 LiquidCrystal_I2C lcd(0x27,16,2);
 Gauge::Gauge tach = Gauge::Gauge(540,0,9000,0);
@@ -62,6 +68,8 @@ int16_t coolant_temp_c;
 bool bright_lights = true;
 String current_error_msg = ERROR_MSG_NONE;
 uint64_t last_request_millis;
+uint64_t last_step_micros;
+volatile uint8_t stepper_current_step = 0; // should be one of [0,1,2,3]
 
 
 #define USE_TIMER_1     false
@@ -79,6 +87,10 @@ uint64_t last_request_millis;
 
 void tick_stepper();
 void display_lcd_stuff(int16_t coolant_temp_in, char const voltage[], char const message[]);
+
+void stepper_set_step(uint8_t step);
+void stepper_single_step(bool is_forwards);
+void do_n_steps(int16_t steps_to_do);
 
 KWP2000ELM elm = KWP2000ELM(ELM_PORT);
 
@@ -118,10 +130,7 @@ void setup()
     lcd.home();
     lcd.print("conecting to ECU");
 
-
-    stepper.setSpeed(50);
-    stepper.step(tach.calibrate());
-    stepper.setSpeed(5000);
+    do_n_steps(tach.calibrate());
 
     if(elm.check_ECU_Connection()){
         DEBUG_PORT.println("Communication established with the ECU");
@@ -140,8 +149,7 @@ void setup()
 
 void loop()
 {
-
-    while((last_request_millis + 100) > millis()){
+    while((last_request_millis + 100) > millis()){ // wait for ECU to be chillin
 
     }
 
@@ -154,6 +162,12 @@ void loop()
 
     if(raw_rpm < 0){
         current_error_msg = ERROR_MSG_BAD_RPM_DATA;
+    }
+
+    if(abs(stepper_delta) > 100){
+        DEBUG_PORT.print("stepper_delta excessive, possible error if this keeps reoccurring");
+        DEBUG_PORT.println(stepper_delta);
+        current_error_msg = ERROR_MSG_STEPPER_DELTA;
     }
 
     if((loop_counter & B0001111) == 0){
@@ -208,10 +222,10 @@ void loop()
 
 void tick_stepper(){
     if(stepper_delta > 0) {
-        stepper.step(1);
+        stepper_single_step(true);
         stepper_delta -= 1;
     } else if (stepper_delta < 0){
-        stepper.step(-1);
+        stepper_single_step(false);
         stepper_delta += 1;
     }
 }
@@ -277,10 +291,74 @@ void display_lcd_stuff(int16_t coolant_temp_in, char const voltage[], char const
         lcd.write(message_fixed_len[message_index]);
         message_index++;
     }
-
 }
 
+/**
+ * executes n steps of the stepper motor
+ * adds delays to cap the speed of the motor (`STEPPER_MIN_DELAY_MICROS` per step)
+ * @param steps_to_do
+ */
+void do_n_steps(int16_t steps_to_do){
+    last_step_micros = micros();
+    bool is_forward = steps_to_do > 0;
+    uint16_t steps_no_direction = abs(steps_to_do);
+    uint16_t steps_done = 0;
+    while(steps_done < steps_no_direction){
+        while(last_step_micros+STEPPER_MIN_DELAY_MICROS > micros()){
+        }
+        stepper_single_step(is_forward);
+        steps_done++;
+    }
+}
 
+/**
+ * does a single step in the given direction
+ * @param is_forwards the direction. true means forwards (positive), false means backwards (negative)
+ */
+void stepper_single_step(bool is_forwards){
+    if(is_forwards){
+        stepper_current_step = (stepper_current_step+1)%4;
+    } else {
+        stepper_current_step = (stepper_current_step-1)%4;
+    }
+    stepper_set_step(stepper_current_step);
+}
+
+/**
+ * sets the stepper motor to the given step position.
+ * @param step the step of the motor to set (0..<4)
+ * @attention if `step` is not one of [0,1,2,3], it will recurse with `step % 4`
+ */
+void stepper_set_step(uint8_t step){
+    switch (step) {
+        case 0:  // 1010
+            digitalWrite(STEPPER_PIN_1, HIGH);
+            digitalWrite(STEPPER_PIN_2, LOW);
+            digitalWrite(STEPPER_PIN_3, HIGH);
+            digitalWrite(STEPPER_PIN_4, LOW);
+            break;
+        case 1:  // 0110
+            digitalWrite(STEPPER_PIN_1, LOW);
+            digitalWrite(STEPPER_PIN_2, HIGH);
+            digitalWrite(STEPPER_PIN_3, HIGH);
+            digitalWrite(STEPPER_PIN_4, LOW);
+            break;
+        case 2:  //0101
+            digitalWrite(STEPPER_PIN_1, LOW);
+            digitalWrite(STEPPER_PIN_2, HIGH);
+            digitalWrite(STEPPER_PIN_3, LOW);
+            digitalWrite(STEPPER_PIN_4, HIGH);
+            break;
+        case 3:  //1001
+            digitalWrite(STEPPER_PIN_1, HIGH);
+            digitalWrite(STEPPER_PIN_2, LOW);
+            digitalWrite(STEPPER_PIN_3, LOW);
+            digitalWrite(STEPPER_PIN_4, HIGH);
+            break;
+        default:
+            stepper_set_step(step%4);
+    }
+}
 
 //Connected to ELM327
 //Sending: ATZ
