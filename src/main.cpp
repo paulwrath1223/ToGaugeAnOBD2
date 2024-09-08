@@ -29,7 +29,7 @@
 #define LCD_CUSTOM_CHAR_VBAT_L 5
 #define LCD_CUSTOM_CHAR_VBAT_R 6
 
-#define TIMER_INTERVAL_MS 4L
+#define TIMER_INTERVAL_MS 16L
 
 const char ERROR_MSG_NONE[] = "No    Errors";
 const char ERROR_MSG_LOW_VOLTAGE[] = "LowBatVoltag";
@@ -170,6 +170,8 @@ void loop()
             current_error_msg = ERROR_MSG_BAD_COOLANT_TEMP_DATA;
         }
 
+        DEBUG_PORT.println("voltage trimmed as c_str: ");
+        DEBUG_PORT.println(global_voltage.c_str());
 
         display_lcd_stuff(coolant_temp_c, global_voltage.c_str(), current_error_msg.c_str());
     }
@@ -199,12 +201,15 @@ void loop()
     }
     ring.show();
     loop_counter++;
+
+    DEBUG_PORT.print("stepper_delta: ");
+    DEBUG_PORT.println(stepper_delta);
 }
 
 void tick_stepper(){
     if(stepper_delta > 0) {
         stepper.step(1);
-        stepper_delta += -1;
+        stepper_delta -= 1;
     } else if (stepper_delta < 0){
         stepper.step(-1);
         stepper_delta += 1;
