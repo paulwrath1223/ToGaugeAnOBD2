@@ -112,7 +112,7 @@ void setup()
 
 void loop()
 {
-    while((last_request_millis + 100) > millis()){ // wait for ECU to be chillin
+    while((last_request_millis + 25) > millis()){ // wait for ECU to be chillin
 
     }
 
