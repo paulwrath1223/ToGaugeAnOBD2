@@ -30,10 +30,10 @@
 #define LCD_CUSTOM_CHAR_VBAT_L 5
 #define LCD_CUSTOM_CHAR_VBAT_R 6
 
-const char ERROR_MSG_NONE[] = "No    Errors";
-const char ERROR_MSG_LOW_VOLTAGE[] = "LowBatVoltag";
-const char ERROR_MSG_BAD_RPM_DATA[] = "Bad Rpm Data";
-const char ERROR_MSG_BAD_COOLANT_TEMP_DATA[] = "Bad TempData";
+const char ERROR_MSG_NONE[13] = "No    Errors";
+const char ERROR_MSG_LOW_VOLTAGE[13] = "LowBatVoltag";
+const char ERROR_MSG_BAD_RPM_DATA[13] = "Bad Rpm Data";
+const char ERROR_MSG_BAD_COOLANT_TEMP_DATA[13] = "Bad TempData";
 
 #define LOW_VOLTAGE_THRESHOLD 11
 
@@ -59,7 +59,8 @@ int32_t stepper_delta = 0;
 String global_voltage;
 int16_t coolant_temp_c;
 bool bright_lights = true;
-String current_error_msg = ERROR_MSG_NONE;
+char current_error_msg[13] = {'\0'};
+uint64_t last_request_millis;
 
 void display_lcd_stuff(int16_t coolant_temp_in, char const voltage[], char const message[]);
 
@@ -69,8 +70,6 @@ void setup()
 {
     DEBUG_PORT.begin(115200);
     ELM_PORT.begin(115200, SERIAL_8N1);
-
-
 
     lcd.init();
     lcd.backlight();
@@ -107,12 +106,17 @@ void setup()
         lcd.print("failed to conect");
         DEBUG_PORT.println("Communication with the ECU was unable to be verified or did not work. Try restarting");
     }
+    last_request_millis = millis();
 }
 
 
 void loop()
 {
-    current_error_msg = ERROR_MSG_NONE;
+    while((last_request_millis + 100) > millis()){ // wait for ECU to be chillin
+
+    }
+
+    strncpy(current_error_msg, ERROR_MSG_NONE, 12);
 
     raw_rpm = elm.getEngineSpeedRpm();
     rpm = (uint32_t)raw_rpm;
@@ -120,10 +124,10 @@ void loop()
     DEBUG_PORT.println(rpm);
 
     if(raw_rpm < 0){
-        current_error_msg = ERROR_MSG_BAD_RPM_DATA;
+        strncpy(current_error_msg, ERROR_MSG_BAD_RPM_DATA, 12);
     }
 
-    if(loop_counter << 4 == 0){
+    if((loop_counter & B00001111) == 0){
         global_voltage = elm.send_command("ATRV");
         DEBUG_PORT.println("voltage: ");
         DEBUG_PORT.println(global_voltage);
@@ -134,15 +138,13 @@ void loop()
         DEBUG_PORT.println(coolant_temp_c);
 
         if(coolant_temp_c < -40){
-            current_error_msg = ERROR_MSG_BAD_COOLANT_TEMP_DATA;
+            strncpy(current_error_msg, ERROR_MSG_BAD_COOLANT_TEMP_DATA, 12);
         }
-
+        display_lcd_stuff(coolant_temp_c, global_voltage.c_str(), current_error_msg);
     }
+    last_request_millis = millis();
 
     bright_lights = analogRead(CLUSTER_BACKLIGHT_PIN) < CLUSTER_BACKLIGHT_LOW_THRESHOLD;
-
-    display_lcd_stuff(coolant_temp_c, global_voltage.c_str(), current_error_msg.c_str());
-
 
     if(bright_lights){
         analogWrite(LCD_BACKLIGHT_PIN, LCD_BACKLIGHT_BRIGHT);
@@ -169,21 +171,21 @@ void loop()
 /**
  *
  * @param coolant_temp (-40..215)
- * @param voltage max 5 chars
+ * @param voltage max 6 chars
  */
 void display_lcd_stuff(int16_t coolant_temp_in, char const voltage[], char const message[]){
-    char message_fixed_len[12] = {' '};
+    char message_fixed_len[13] = {'\0'};
     strncpy(message_fixed_len, message, 12);
 
-    char voltage_fixed_len[5] = {' '};
-    strncpy(voltage_fixed_len, voltage, 5);
+    char voltage_fixed_len[7] = {'\0'};
+    strncpy(voltage_fixed_len, voltage, 6);
 
     bool was_negative = coolant_temp_in < 0;
     uint8_t coolant_temp = abs(coolant_temp_in);
     uint8_t digit_1_place = coolant_temp%10;
     coolant_temp/=10;
     uint8_t digit_10_place = coolant_temp%10;
-    char coolant_temp_as_str[3];
+    char coolant_temp_as_str[4];
     coolant_temp_as_str[2] = (char)(digit_1_place+0x30);
     coolant_temp_as_str[1] = (char)(digit_10_place+0x30);
     if(was_negative){
@@ -197,6 +199,7 @@ void display_lcd_stuff(int16_t coolant_temp_in, char const voltage[], char const
             coolant_temp_as_str[0] = (char)((digit_100_place)+0x30);
         }
     }
+    coolant_temp_as_str[3] = '\0';
 
     uint8_t message_index = 0;
 
@@ -218,7 +221,6 @@ void display_lcd_stuff(int16_t coolant_temp_in, char const voltage[], char const
     lcd.setCursor(0,1);
     lcd.write(LCD_CUSTOM_CHAR_VBAT_L);
     lcd.write(LCD_CUSTOM_CHAR_VBAT_R);
-    lcd.write(' ');
     lcd.printstr(voltage_fixed_len);
     lcd.setCursor(9,1);
     lcd.write(LCD_CUSTOM_CHAR_DIVIDER_LEFT);
